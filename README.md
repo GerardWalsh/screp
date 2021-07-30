@@ -2,7 +2,7 @@
 
 "_That's nice honey._"
 
-![Image](spin.jpg)
+![Image](rickyrick.png)
 
 ## You'll need a
 
