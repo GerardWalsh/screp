@@ -1,6 +1,7 @@
 # screp
 
 Screpi boi. Let's screp. Or spin.
+![Image](spin.jpg)
 
 ## You'll need a
 
