@@ -15,6 +15,7 @@ driver.get("https://www.webuycars.co.za/buy-a-car?q=86")
 
 soup = BeautifulSoup(driver.page_source, "html.parser")
 eight_sixes = soup.find_all("div", {"class": "filter-item-media"})
+print(f"we Have {len(eight_sixes)} examples")
 
 first_love = eight_sixes[0]
 first_loves_address = first_love.select_one("a")["href"]
