@@ -64,11 +64,11 @@ def main():
     st.title("Cars & stuff")
     # df = load_data()
     df = pd.read_csv("frontend_data.csv", index_col=0)
-    cols = df.columns.tolist()
+    cols = sorted(df.columns.tolist())
     cols.remove("image_url")
     column = st.selectbox("Select column to filter by", cols, index=1)
 
-    unique_values = df[column].unique().tolist()
+    unique_values = sorted(df[column].unique().tolist())
     filter_value = st.selectbox(
         f"Select the {column} to filter by", unique_values, index=8
     )
