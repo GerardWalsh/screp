@@ -22,7 +22,7 @@ def get_the_data(group):
         - pd.to_datetime(group["scrape_time"]).min()
     )
     sold = pd.to_datetime(group["scrape_time"].fillna("").max()) < (
-        datetime.now() - timedelta(days=2)
+        datetime.now() - timedelta(days=1)
     )
     site = group["site"].unique()[0]
     last_seen = pd.to_datetime(group["scrape_time"]).max()
@@ -83,13 +83,13 @@ def main():
         if gen_filter != []:
             filtered_df = filtered_df[filtered_df.generation.isin(gen_filter)]
 
-    tag_filter = st.multiselect(
-        "Search functionality: ",
-        ["turbo", "gt3", "competition"],
+    tag_filter = st.text_input(
+        "Search by keyword (try: 'sport', 'touring', 'automatic')",
+        key="placeholder",
     )
     if tag_filter:
         filtered_df = filtered_df[
-            filtered_df.title.fillna("").str.lower().str.contains(tag_filter[0])
+            filtered_df.title.fillna("").str.lower().str.contains(tag_filter.lower())
         ]
     appointment = st.slider(
         "Model year range:",
