@@ -57,6 +57,7 @@ def load_data():
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
 
     df = df.groupby("link").apply(get_the_data).reset_index(drop=True)
+    df.to_csv("frontend_data.csv")
     return df
 
 
@@ -83,14 +84,20 @@ def main():
             filtered_df = filtered_df[filtered_df.generation.isin(gen_filter)]
 
     tag_filter = st.multiselect(
-        "Special tags selection: ",
+        "Search functionality: ",
         ["turbo", "gt3", "competition"],
     )
     if tag_filter:
         filtered_df = filtered_df[
             filtered_df.title.fillna("").str.lower().str.contains(tag_filter[0])
         ]
-
+    appointment = st.slider(
+        "Model year range:",
+        value=(filtered_df.year.min(), filtered_df.year.max()),
+        min_value=1980,
+        max_value=2024,
+    )
+    filtered_df = filtered_df[filtered_df.year.between(appointment[0], appointment[1])]
     # Display filtered dataframe
     st.write(f"Filtered Dataframe based on {column} = {filter_value}")
     st.dataframe(
@@ -99,14 +106,7 @@ def main():
         column_config={"image_url": st.column_config.ImageColumn(label="image_url")},
     )
 
-    st.write("Average Price Against Year")
-    appointment = st.slider(
-        "Model year range:",
-        value=(filtered_df.year.min(), filtered_df.year.max()),
-        min_value=1980,
-        max_value=2024,
-    )
-    filtered_df = filtered_df[filtered_df.year.between(appointment[0], appointment[1])]
+    st.write("Sold vs listed prices, against year")
     if "max_price" in df.columns and "year" in df.columns:
         avg_price_per_year = (
             filtered_df.groupby(["year", "sold"])["max_price"].mean().reset_index()
