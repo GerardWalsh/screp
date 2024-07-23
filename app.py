@@ -63,8 +63,8 @@ def load_data():
 
 def main():
     st.title("Cars & stuff")
-    # df = load_data()
-    df = pd.read_csv("frontend_data.csv", index_col=0)
+    df = load_data()
+    # df = pd.read_csv("frontend_data.csv", index_col=0)
     df = df.dropna(subset="model")
     column = st.selectbox(
         "Select column to filter by", ["model", "manufacturer", "generation"], index=0
@@ -103,7 +103,10 @@ def main():
     st.dataframe(
         filtered_df,
         use_container_width=True,
-        column_config={"image_url": st.column_config.ImageColumn(label="image_url")},
+        column_config={
+            "image_url": st.column_config.ImageColumn(label="image_url"),
+            "link": st.column_config.LinkColumn("link"),
+        },
     )
 
     st.write("Sold vs listed prices, against year")
