@@ -63,7 +63,7 @@ def load_data():
 def main():
     st.title("Cars & stuff")
     # df = load_data()
-    df = pd.read_csv("frontend_data.csv", index_col=0).drop(columns=["Unnamed: 0"])
+    df = pd.read_csv("frontend_data.csv", index_col=0)
     column = st.selectbox("Select column to filter by", df.columns, index=1)
 
     unique_values = df[column].unique().tolist()
