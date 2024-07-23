@@ -63,8 +63,8 @@ def load_data():
 
 def main():
     st.title("Cars & stuff")
-    df = load_data()
-    # df = pd.read_csv("frontend_data.csv", index_col=0)
+    # df = load_data()
+    df = pd.read_csv("frontend_data.csv", index_col=0)
     df = df.dropna(subset="model")
     column = st.selectbox(
         "Select column to filter by", ["model", "manufacturer", "generation"], index=0
