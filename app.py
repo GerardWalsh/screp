@@ -64,7 +64,7 @@ def main():
     st.title("Cars & stuff")
     # df = load_data()
     df = pd.read_csv("frontend_data.csv", index_col=0)
-    cols = sorted(df.columns.tolist())
+    cols = sorted(["model", "make", "generation"])
     cols.remove("image_url")
     column = st.selectbox("Select column to filter by", cols, index=1)
 
