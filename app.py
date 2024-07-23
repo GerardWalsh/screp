@@ -62,8 +62,8 @@ def load_data():
 
 def main():
     st.title("Cars & stuff")
-    df = load_data()
-    df.to_csv("frontend_data.csv")
+    # df = load_data()
+    df = pd.read_csv("frontend_data.csv")
     column = st.selectbox("Select column to filter by", df.columns, index=1)
 
     unique_values = df[column].unique().tolist()
