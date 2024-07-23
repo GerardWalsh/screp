@@ -3,3 +3,4 @@ requests
 selenium
 matplotlib
 seaborn
+plotly
