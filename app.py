@@ -147,6 +147,7 @@ def main():
                 "image_url": st.column_config.ImageColumn(label="image_url"),
                 "link": st.column_config.LinkColumn("link"),
             },
+            hide_index=True,
         )
 
         st.write("Sold vs listed prices, against year")
