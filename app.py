@@ -75,8 +75,8 @@ def main():
     )
 
     df = pd.read_csv("frontend_data.csv", index_col=0)
-    df.time_online = df.time_online.dt.strftime("%d %H:%M")
-    df.last_seen = df.last_seen.dt.strftime("%d %H:%M")
+    df.time_online = pd.to_datetime(df.time_online).dt.strftime("%d %H:%M")
+    df.last_seen = pd.to_datetime(df.last_seen).dt.strftime("%d %H:%M")
     filter_map = {
         "model": [
             " ".join(x).title()
