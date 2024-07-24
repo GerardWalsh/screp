@@ -64,6 +64,16 @@ def load_data():
 def main():
     st.title("Cars & stuff")
     # df = load_data()
+    page = st.selectbox(
+        "App functionality",
+        [
+            "Please choose an option",
+            "market overview",
+            "price estimation",
+            "sales report",
+        ],
+    )
+
     df = pd.read_csv("frontend_data.csv", index_col=0)
     filter_map = {
         "model": [
@@ -88,78 +98,107 @@ def main():
         ],
     }
     df = df.dropna(subset="model")
-    column = st.selectbox(
-        "Select column to filter by", ["model", "manufacturer", "generation"], index=0
-    )
-    unique_values = filter_map[column]
-    filter_value = st.selectbox(
-        f"Select the {column} to filter by", unique_values, index=8
-    )
+    if page == "market overview":
+        column = st.selectbox(
+            "Select column to filter by", ["model", "manufacturer", "generation"], index=0
+        )
+        unique_values = filter_map[column]
+        filter_value = st.selectbox(
+            f"Select the {column} to filter by", unique_values, index=8
+        )
 
-    # Filter dataframe
-    if column == "model":
-        filter_value = " ".join(filter_value.split(" ")[1:]).lower()
-    elif column == "manufacturer":
-        filter_value = filter_value
+        # Filter dataframe
+        if column == "model":
+            filter_value = " ".join(filter_value.split(" ")[1:]).lower()
+        elif column == "manufacturer":
+            filter_value = filter_value
 
-    filtered_df = df[df[column] == filter_value]
+        filtered_df = df[df[column] == filter_value]
 
-    if filtered_df.generation.any():
-        gen = filtered_df.generation.unique().tolist()
-        gen_filter = st.multiselect("Select the generation to filter by", gen)
-        if gen_filter != []:
-            filtered_df = filtered_df[filtered_df.generation.isin(gen_filter)]
+        if filtered_df.generation.any():
+            gen = filtered_df.generation.unique().tolist()
+            gen_filter = st.multiselect("Select the generation to filter by", gen)
+            if gen_filter != []:
+                filtered_df = filtered_df[filtered_df.generation.isin(gen_filter)]
 
-    tag_filter = st.text_input(
-        "Search by keyword (try: 'sport', 'touring', 'automatic')",
-        key="placeholder",
-    )
-    if tag_filter:
+        tag_filter = st.text_input(
+            "Search by keyword (try: 'sport', 'touring', 'automatic')",
+            key="placeholder",
+        )
+        if tag_filter:
+            filtered_df = filtered_df[
+                filtered_df.title.fillna("").str.lower().str.contains(tag_filter.lower())
+            ]
+        appointment = st.slider(
+            "Model year range:",
+            value=(filtered_df.year.min(), filtered_df.year.max()),
+            min_value=1980,
+            max_value=2024,
+        )
         filtered_df = filtered_df[
-            filtered_df.title.fillna("").str.lower().str.contains(tag_filter.lower())
+            filtered_df.year.between(appointment[0], appointment[1])
         ]
-    appointment = st.slider(
-        "Model year range:",
-        value=(filtered_df.year.min(), filtered_df.year.max()),
-        min_value=1980,
-        max_value=2024,
-    )
-    filtered_df = filtered_df[filtered_df.year.between(appointment[0], appointment[1])]
-    # Display filtered dataframe
-    st.write(f"Filtered Dataframe based on {column} = {filter_value}")
-    st.dataframe(
-        filtered_df,
-        use_container_width=True,
-        column_config={
-            "image_url": st.column_config.ImageColumn(label="image_url"),
-            "link": st.column_config.LinkColumn("link"),
-        },
-    )
-
-    st.write("Sold vs listed prices, against year")
-    if "max_price" in df.columns and "year" in df.columns:
-        avg_price_per_year = (
-            filtered_df.groupby(["year", "sold"])["max_price"].mean().reset_index()
-        )
-        color_discrete_map = {
-            1: "rgb(255,0,0)",
-            2: "rgb(0,255,0)",
-        }
-        # print(filtered_df)
-        fig = px.scatter(
+        # Display filtered dataframe
+        st.write(f"Filtered Dataframe based on {column} = {filter_value}")
+        st.dataframe(
             filtered_df,
-            x="year",
-            y="max_price",
-            color="sold",
-            hover_data=["max_price"],
-            color_discrete_map={False: "#316295", True: "#B82E2E"},
+            use_container_width=True,
+            column_config={
+                "image_url": st.column_config.ImageColumn(label="image_url"),
+                "link": st.column_config.LinkColumn("link"),
+            },
         )
-        event = st.plotly_chart(fig, key="iris", on_select="rerun")
-        # event
-        plt.title("Average Price Against Year")
-        plt.xlabel("Year")
-        plt.ylabel("Average Price")
-        plt.xticks(rotation=45)
+
+        st.write("Sold vs listed prices, against year")
+        if "max_price" in df.columns and "year" in df.columns:
+            avg_price_per_year = (
+                filtered_df.groupby(["year", "sold"])["max_price"].mean().reset_index()
+            )
+            color_discrete_map = {
+                1: "rgb(255,0,0)",
+                2: "rgb(0,255,0)",
+            }
+            # print(filtered_df)
+            fig = px.scatter(
+                filtered_df,
+                x="year",
+                y="max_price",
+                color="sold",
+                hover_data=["max_price"],
+                color_discrete_map={False: "#316295", True: "#B82E2E"},
+            )
+            event = st.plotly_chart(fig, key="iris", on_select="rerun")
+            # event
+            plt.title("Average Price Against Year")
+            plt.xlabel("Year")
+            plt.ylabel("Average Price")
+            plt.xticks(rotation=45)
+    elif page == "price estimation":
+        st.write("Coming soon!")
+        # model = st.selectbox("select your model", filter_map["model"])
+        # model = " ".join(model.split(" ")[1:]).lower()
+        # mileage = st.text_input("Enter your mileage")
+        # year = st.text_input("Enter the year")
+        # generate_report = st.button("generate price!")
+        # if generate_report:
+        #     mileage = int(mileage)
+        #     data = df[
+        #         df.model.eq(model) & df.mileage.between(mileage - 1000, mileage + 1000)
+        #     ]
+        #     st.write("30 thousands dollars Jordan! R", data.max_price.mean())
+    elif page == "sales report":
+        st.write("Coming soon!")
+        # model = st.selectbox("select your model", filter_map["model"])
+        # model = " ".join(model.split(" ")[1:]).lower()
+        # # mileage = st.text_input("Enter your mileage")
+        # year = st.text_input("Enter the year")
+        # generate_report = st.button("generate price!")
+        # if generate_report:
+        #     #     mileage = int(mileage)
+        #     #     data = df[
+        #     #         df.model.eq(model) & df.mileage.between(mileage - 1000, mileage + 1000)
+        #     #     ]
+        #     st.write("30 thousands dollars Jordan!")
 
 
 if __name__ == "__main__":
