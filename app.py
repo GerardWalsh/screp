@@ -20,12 +20,12 @@ def get_the_data(group):
     time_online = (
         pd.to_datetime(group["scrape_time"]).max()
         - pd.to_datetime(group["scrape_time"]).min()
-    ).dt.round()
+    ).dt.strftime("%d %H:%M")
     sold = pd.to_datetime(group["scrape_time"].fillna("").max()) < (
         datetime.now() - timedelta(days=1)
     )
     site = group["site"].unique()[0]
-    last_seen = pd.to_datetime(group["scrape_time"]).max()
+    last_seen = pd.to_datetime(group["scrape_time"]).max().dt.strftime("%d %H:%M")
     title = group["title"].unique().tolist()[0]
     generation = group["generation"].unique().tolist()[0]
     image_url = group["image_url"].fillna("no image").unique().tolist()[-1]
