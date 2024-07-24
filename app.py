@@ -75,6 +75,8 @@ def main():
     )
 
     df = pd.read_csv("frontend_data.csv", index_col=0)
+    df.time_online = pd.to_timedelta(df.time_online).round("1 min")
+    # df.last_seen = pd.to_timedelta(df.last_seen).round("1 min")
     filter_map = {
         "model": [
             " ".join(x).title()
