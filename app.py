@@ -20,7 +20,7 @@ def get_the_data(group):
     time_online = (
         pd.to_datetime(group["scrape_time"]).max()
         - pd.to_datetime(group["scrape_time"]).min()
-    )
+    ).dt.round()
     sold = pd.to_datetime(group["scrape_time"].fillna("").max()) < (
         datetime.now() - timedelta(days=1)
     )
