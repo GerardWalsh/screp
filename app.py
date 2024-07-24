@@ -65,16 +65,43 @@ def main():
     st.title("Cars & stuff")
     # df = load_data()
     df = pd.read_csv("frontend_data.csv", index_col=0)
+    filter_map = {
+        "model": [
+            " ".join(x).title()
+            for x in sorted(df[["manufacturer", "model"]].value_counts().index.tolist())
+        ],
+        "manufacturer": [
+            "alfa-romeo",
+            "audi",
+            "bmw",
+            "ferrari",
+            "honda",
+            "jaguar",
+            "mclaren",
+            "mercedes-amg",
+            "mercedes-benz",
+            "nissan",
+            "porsche",
+            "renault",
+            "suzuki",
+            "toyota",
+        ],
+    }
     df = df.dropna(subset="model")
     column = st.selectbox(
         "Select column to filter by", ["model", "manufacturer", "generation"], index=0
     )
-    unique_values = sorted(df[column].unique().tolist())
+    unique_values = filter_map[column]
     filter_value = st.selectbox(
         f"Select the {column} to filter by", unique_values, index=8
     )
 
     # Filter dataframe
+    if column == "model":
+        filter_value = " ".join(filter_value.split(" ")[1:]).lower()
+    elif column == "manufacturer":
+        filter_value = filter_value
+
     filtered_df = df[df[column] == filter_value]
 
     if filtered_df.generation.any():
