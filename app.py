@@ -141,6 +141,8 @@ def main():
             filtered_df.year.between(appointment[0], appointment[1])
         ]
         # Display filtered dataframe
+        filtered_df = filtered_df.rename(columns={"sold": "status"})
+        filtered_df.status = filtered_df.status.map({False: "available", True: "sold"})
         st.write(f"Filtered Dataframe based on {column} = {filter_value}")
         st.dataframe(
             filtered_df,
@@ -155,7 +157,7 @@ def main():
         st.write("Sold vs listed prices, against year")
         if "max_price" in df.columns and "year" in df.columns:
             avg_price_per_year = (
-                filtered_df.groupby(["year", "sold"])["max_price"].mean().reset_index()
+                filtered_df.groupby(["year", "status"])["max_price"].mean().reset_index()
             )
             color_discrete_map = {
                 1: "rgb(255,0,0)",
@@ -166,9 +168,9 @@ def main():
                 filtered_df,
                 x="year",
                 y="max_price",
-                color="sold",
-                hover_data=["max_price"],
-                color_discrete_map={False: "#316295", True: "#B82E2E"},
+                color="status",
+                hover_data={"mileage": True, "status": False},
+                color_discrete_map={"available": "#316295", "sold": "#B82E2E"},
             )
             event = st.plotly_chart(fig, key="iris", on_select="rerun")
             # event
