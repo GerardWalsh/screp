@@ -10,55 +10,55 @@ from datetime import datetime
 st.set_page_config(layout="wide")
 
 
-def get_the_data(group):
-    year = group["year"].unique()[0]
-    model = group["model"].unique()[0]
-    manu = group["manufacturer"].unique()[0]
-    min = int(group["price"].fillna(999).min())
-    max = int(group["price"].fillna(999).max())
-    link = group["link"].unique()[0]
-    time_online = (
-        pd.to_datetime(group["scrape_time"]).max()
-        - pd.to_datetime(group["scrape_time"]).min()
-    )
-    sold = pd.to_datetime(group["scrape_time"].fillna("").max()) < (
-        datetime.now() - timedelta(days=1)
-    )
-    site = group["site"].unique()[0]
-    last_seen = pd.to_datetime(group["scrape_time"]).max()
-    title = group["title"].unique().tolist()[0]
-    generation = group["generation"].unique().tolist()[0]
-    image_url = group["image_url"].fillna("no image").unique().tolist()[-1]
-    return pd.Series(
-        {
-            "manufacturer": manu,
-            "model": model,
-            "generation": generation,
-            "year": year,
-            "min_price": min,
-            "max_price": max,
-            "time_online": time_online,
-            "last_seen": last_seen,
-            "mileage": group["mileage"].fillna(999).astype(int).unique().tolist()[0],
-            "sold": sold,
-            "site": site,
-            "title": title,
-            "link": link,
-            "image_url": image_url,
-        }
-    )
+# def get_the_data(group):
+#     year = group["year"].unique()[0]
+#     model = group["model"].unique()[0]
+#     manu = group["manufacturer"].unique()[0]
+#     min = int(group["price"].fillna(999).min())
+#     max = int(group["price"].fillna(999).max())
+#     link = group["link"].unique()[0]
+#     time_online = (
+#         pd.to_datetime(group["scrape_time"]).max()
+#         - pd.to_datetime(group["scrape_time"]).min()
+#     )
+#     sold = pd.to_datetime(group["scrape_time"].fillna("").max()) < (
+#         datetime.now() - timedelta(days=1)
+#     )
+#     site = group["site"].unique()[0]
+#     last_seen = pd.to_datetime(group["scrape_time"]).max()
+#     title = group["title"].unique().tolist()[0]
+#     generation = group["generation"].unique().tolist()[0]
+#     image_url = group["image_url"].fillna("no image").unique().tolist()[-1]
+#     return pd.Series(
+#         {
+#             "manufacturer": manu,
+#             "model": model,
+#             "generation": generation,
+#             "year": year,
+#             "min_price": min,
+#             "max_price": max,
+#             "time_online": time_online,
+#             "last_seen": last_seen,
+#             "mileage": group["mileage"].fillna(999).astype(int).unique().tolist()[0],
+#             "sold": sold,
+#             "site": site,
+#             "title": title,
+#             "link": link,
+#             "image_url": image_url,
+#         }
+#     )
 
 
 # Load the CSV file
-@st.cache
-def load_data():
-    df = pd.read_csv("data.csv")
-    for col in ["year", "price", "mileage"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
+# @st.cache
+# def load_data():
+#     df = pd.read_csv("data.csv")
+#     for col in ["year", "price", "mileage"]:
+#         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
 
-    df = df.groupby("link").apply(get_the_data).reset_index(drop=True)
-    df.to_csv("frontend_data.csv")
-    return df
+#     df = df.groupby("link").apply(get_the_data).reset_index(drop=True)
+#     df.to_csv("frontend_data.csv")
+#     return df
 
 
 def main():
@@ -180,17 +180,46 @@ def main():
             plt.xticks(rotation=45)
     elif page == "price estimation":
         st.write("Coming soon!")
-        # model = st.selectbox("select your model", filter_map["model"])
-        # model = " ".join(model.split(" ")[1:]).lower()
-        # mileage = st.text_input("Enter your mileage")
-        # year = st.text_input("Enter the year")
-        # generate_report = st.button("generate price!")
-        # if generate_report:
-        #     mileage = int(mileage)
-        #     data = df[
-        #         df.model.eq(model) & df.mileage.between(mileage - 1000, mileage + 1000)
-        #     ]
-        #     st.write("30 thousands dollars Jordan! R", data.max_price.mean())
+        model = st.selectbox("select your model", filter_map["model"])
+        similar_mileage = st.slider(
+            "Mileage offset:",
+            value=(-10000, 10000),
+            min_value=-20000,
+            max_value=20000,
+        )
+        model = " ".join(model.split(" ")[1:]).lower()
+        mileage = st.text_input("Enter your mileage")
+        year = st.text_input("Enter the year")
+        generate_report = st.button("generate price!")
+        if generate_report:
+            mileage = int(mileage)
+            data = df[
+                df.model.eq(model)
+                & df.year.eq(int(year))
+                & df.mileage.between(
+                    mileage + similar_mileage[0], mileage + similar_mileage[1]
+                )
+            ][
+                [
+                    "title",
+                    "generation",
+                    "max_price",
+                    "mileage",
+                    "sold",
+                    "time_online",
+                    "link",
+                ]
+            ]
+            st.write("Similar ads for year & mileage range")
+            st.dataframe(
+                data,
+                column_config={
+                    "link": st.column_config.LinkColumn("link"),
+                },
+            )
+            st.write(
+                f"Mean price for year model and mileage range: R{ data.max_price.mean()}",
+            )
     elif page == "sales report":
         st.write("Coming soon!")
         # model = st.selectbox("select your model", filter_map["model"])
