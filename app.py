@@ -145,7 +145,27 @@ def main():
         filtered_df.status = filtered_df.status.map({False: "available", True: "sold"})
         st.write(f"Filtered Dataframe based on {column} = {filter_value}")
         st.dataframe(
-            filtered_df,
+            filtered_df[
+                [
+                    "image_url",
+                    "title",
+                    # "generation",
+                    "min_price",
+                    "max_price",
+                    "year",
+                    "mileage",
+                    "status",
+                    "time_online",
+                    "link",
+                    "site",
+                    "last_seen",
+                ]
+            ].rename(
+                columns={
+                    "min_price": "min_listed_price",
+                    "max_price": "max_listed_price",
+                }
+            ),
             use_container_width=True,
             column_config={
                 "image_url": st.column_config.ImageColumn(label="image_url"),
