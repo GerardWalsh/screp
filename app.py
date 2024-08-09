@@ -164,6 +164,7 @@ def main():
                 columns={
                     "min_price": "min_listed_price",
                     "max_price": "max_listed_price",
+                    "image_url": "image_url (click me!)",
                 }
             ),
             use_container_width=True,
