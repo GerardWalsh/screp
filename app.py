@@ -169,7 +169,9 @@ def main():
             ),
             use_container_width=True,
             column_config={
-                "image_url": st.column_config.ImageColumn(label="image_url"),
+                "image_url (click me!)": st.column_config.ImageColumn(
+                    label="image_url (click me!)"
+                ),
                 "link": st.column_config.LinkColumn("link"),
             },
             hide_index=True,
