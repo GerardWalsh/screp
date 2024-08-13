@@ -186,13 +186,17 @@ def main():
                 1: "rgb(255,0,0)",
                 2: "rgb(0,255,0)",
             }
-            # print(filtered_df)
             fig = px.scatter(
-                filtered_df,
-                x="year",
+                filtered_df.assign(),
+                x="date_scraped",
                 y="max_price",
                 color="status",
-                hover_data={"mileage": True, "status": False},
+                hover_data={
+                    "mileage": True,
+                    "status": False,
+                    "last_seen": True,
+                    "date_scraped": False,
+                },
                 color_discrete_map={"available": "#316295", "sold": "#B82E2E"},
             )
             event = st.plotly_chart(fig, key="iris", on_select="rerun")
