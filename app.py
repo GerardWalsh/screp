@@ -188,14 +188,14 @@ def main():
             }
             fig = px.scatter(
                 filtered_df.assign(),
-                x="date_scraped",
+                x="date_listed",
                 y="max_price",
                 color="status",
                 hover_data={
                     "mileage": True,
                     "status": False,
                     "last_seen": True,
-                    "date_scraped": False,
+                    "date_listed": False,
                 },
                 color_discrete_map={"available": "#316295", "sold": "#B82E2E"},
             )
