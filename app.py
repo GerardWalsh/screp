@@ -158,6 +158,7 @@ def main():
                     "time_online",
                     "link",
                     "site",
+                    "date_listed",
                     "last_seen",
                 ]
             ].rename(
