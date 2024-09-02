@@ -1,0 +1,49 @@
+Alfa Romeo:
+  - Giulia
+Audi: 
+  # - rs4 # TODO: should add this back
+  - A6
+  - S4
+  - R8
+  - S3
+  - S5
+  - A3
+BMW: 
+  - 1 Series
+  - 2 Series 
+  - 3 Series
+  - 5 Series
+  - M2
+  - M3
+  - M4
+  - M5
+  - Z4
+  - Z4 M
+  - Z3
+Honda: 
+  - S2000
+Nissan: 
+#   - 350z
+#   - 370z
+  - GT-R
+Porsche:
+  - Cayman
+  - Boxster
+  - 911
+  - Cayenne
+  - Cayenne Coupe
+Toyota:
+  - Corolla
+  - Yaris
+  - Yaris GR
+  - Prado
+  - GR Supra
+  - 86
+Mercedes-Benz:
+  - C Class
+Suzuki:
+  - Jimny
+Renault:
+  - Clio III
+  - Sandero
+  - Megane
