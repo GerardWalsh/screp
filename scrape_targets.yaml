@@ -1,0 +1,64 @@
+alfa-romeo:
+  - giulia
+audi: 
+  - rs4
+  - rs6
+  - s4
+BMW: 
+  - 1-series
+  - 2-series
+  - 3-series
+  - m2
+  - m3
+  - m4
+  - m5
+  - m6
+  - z4
+  - z3
+ferrari:
+  - 360
+  - f430
+  - 458
+  - 488
+  - sf90
+  - 812
+  - f12
+  - f12berlinetta
+Honda: 
+  - s2000
+nissan: 
+  - 350z
+  - 370z
+  - gt-r
+mclaren:
+  - 570
+  - 600lt
+  - 650s
+  - 675lt
+  - 720s
+  - 765
+  - GT
+  - MP4-12C
+porsche:
+  - cayenne
+  - cayman
+  - 718-cayman
+  - boxster
+  - 718-boxster
+  - 911
+toyota:
+  - gr-yaris
+  - gr-supra
+  - gr-corolla
+  - 86
+  - gr86
+  - land-cruiser-prado
+mercedes-benz:
+  - c-class/c63/search
+mercedes-amg:
+  - c-class/c63/search
+renault:
+  - sandero
+  - megane
+suzuki:
+  - jimny
