@@ -11,18 +11,19 @@ from utils import (
     find_total_pages,
     get_ad_details,
     insert_ads,
+    get_soup
 )
-
-data = load_yaml("scrape_configs/autotrader_scrape_targets.yaml")
+target_site = "autotrader"
+url_patterns = {"autotrader": "https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber=1"}
+data = load_yaml(f"scrape_configs/{target_site}_scrape_targets.yaml")
 driver = setup_driver()
 
-
+model_url = url_patterns[target_site]
 for manufacturer in data.keys():
     for model in data[manufacturer]:
         datas = []
-        model_url = f"https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber=1"
-        driver.get(model_url)
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+        model_url = model_url.format(manufacturer, model)
+        soup = get_soup(driver, model_url, pause=False)
         pages = len(soup.find_all(*find_total_pages(soup, "autotrader")))
         ad_count = int(soup.select(find_total_ads(soup, "autotrader"))[0].text)
         print(f"Found {ad_count} ads for {model}")
@@ -30,9 +31,7 @@ for manufacturer in data.keys():
             if i != 0:
                 print(f"Getting page {i+1} data")
                 model_url = f"https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber={i+1}"
-                driver.get(model_url)
-                time.sleep(5)
-                soup = BeautifulSoup(driver.page_source, "html.parser")
+                soup = get_soup(driver, model_url)
 
             for ad_soup in soup.select('[class^="b-result-tile__"]'):
                 try:
