@@ -1,52 +1,44 @@
-import os
-from pathlib import Path
-import requests
+from datetime import datetime
+import time
 
 from bs4 import BeautifulSoup
-import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
 
-import ipdb
+from utils import (
+    load_yaml,
+    setup_driver,
+    find_total_ads,
+    find_total_pages,
+    get_ad_details,
+    insert_ads,
+)
 
-from utils import load_yaml, setup_driver, find_total_ads, find_total_pages
-
-data = load_yaml("scrape_targets.yaml")
+data = load_yaml("scrape_configs/autotrader_scrape_targets.yaml")
 driver = setup_driver()
 
 
 for manufacturer in data.keys():
     for model in data[manufacturer]:
-        model_url = f"https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?"
+        datas = []
+        model_url = f"https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber=1"
         driver.get(model_url)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         pages = len(soup.find_all(*find_total_pages(soup, "autotrader")))
-        ad_count = int(soup.select(find_total_ads(soup, 'autotrader'))[0].text)
-        ipdb.set_trace()
+        ad_count = int(soup.select(find_total_ads(soup, "autotrader"))[0].text)
+        print(f"Found {ad_count} ads for {model}")
+        for i in range(pages):
+            if i != 0:
+                print(f"Getting page {i+1} data")
+                model_url = f"https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber={i+1}"
+                driver.get(model_url)
+                time.sleep(5)
+                soup = BeautifulSoup(driver.page_source, "html.parser")
 
-
-# price = []
-# mileage = []
-# year = []
-
-# for page_number in range(1, len(pages) + 1):
-#     url = f"https://www.autotrader.co.za/cars-for-sale/bmw/m3?pagenumber={page_number}&year=2007-to-2013"
-#     driver.get(url)
-#     soup = BeautifulSoup(driver.page_source, "html.parser")
-
-#     meta = soup.find_all("span", {"class": "e-icons"})
-#     prices = soup.find_all("span", {"class": "e-price"})
-
-#     for ad in zip(prices, meta):
-#         try:
-#             price.append(int(ad[0].text.replace("R ", "").replace("\xa0", "")))
-#             year.append(int(ad[1].text[0:4]))
-#             mileage.append(int(ad[1].text.split("km")[0][4:-1].replace("\xa0", "")))
-#         except:
-#             print("error appending")
-#             pass
-
-# sns.scatterplot(x=mileage, y=price, hue=year, palette="bright")
-# plt.xlabel("Mileage [km]")
-# plt.ylabel("Price [R]")
-# plt.title("Price vs mileage for the Toyota 86, on Autotrader")
-# plt.show()
+            for ad_soup in soup.select('[class^="b-result-tile__"]'):
+                try:
+                    datas.append(get_ad_details(ad_soup))
+                except:
+                    pass
+        datas = pd.DataFrame(datas)
+        datas["date_retrieved"] = str(datetime.now())
+        insert_ads(db_name="listings", data=datas)
