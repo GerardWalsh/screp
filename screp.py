@@ -4,11 +4,17 @@ import time
 from bs4 import BeautifulSoup
 import pandas as pd
 
-from utils import load_yaml, setup_driver, find_total_ads, find_total_pages, get_ad_details, insert_ads
+from utils import (
+    load_yaml,
+    setup_driver,
+    find_total_ads,
+    find_total_pages,
+    get_ad_details,
+    insert_ads,
+)
 
 data = load_yaml("scrape_configs/autotrader_scrape_targets.yaml")
 driver = setup_driver()
-
 
 
 for manufacturer in data.keys():
@@ -18,7 +24,7 @@ for manufacturer in data.keys():
         driver.get(model_url)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         pages = len(soup.find_all(*find_total_pages(soup, "autotrader")))
-        ad_count = int(soup.select(find_total_ads(soup, 'autotrader'))[0].text)
+        ad_count = int(soup.select(find_total_ads(soup, "autotrader"))[0].text)
         print(f"Found {ad_count} ads for {model}")
         for i in range(pages):
             if i != 0:
@@ -27,12 +33,12 @@ for manufacturer in data.keys():
                 driver.get(model_url)
                 time.sleep(5)
                 soup = BeautifulSoup(driver.page_source, "html.parser")
-    
+
             for ad_soup in soup.select('[class^="b-result-tile__"]'):
                 try:
                     datas.append(get_ad_details(ad_soup))
                 except:
                     pass
         datas = pd.DataFrame(datas)
-        datas['date_retrieved'] = str(datetime.now())
+        datas["date_retrieved"] = str(datetime.now())
         insert_ads(db_name="listings", data=datas)
