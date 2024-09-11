@@ -6,7 +6,7 @@
 
 ## You'll need
 
-- A chromewebdriver - you can get [here](https://chromedriver.chromium.org/downloads). Extract into the root directory of the repo.
+- A chromewebdriver, that you can get [here](https://chromedriver.chromium.org/downloads). Extract into the root directory of the repo.
 - To install the [requirements](./requirements.txt)
 
 
