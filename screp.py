@@ -1,8 +1,9 @@
 import time
+from datetime import datetime
 
 from bs4 import BeautifulSoup
 import pandas as pd
-import joblib
+import sqlite3
 
 import ipdb
 
@@ -10,6 +11,8 @@ from utils import load_yaml, setup_driver, find_total_ads, find_total_pages, get
 
 data = load_yaml("scrape_configs/autotrader_scrape_targets.yaml")
 driver = setup_driver()
+con = sqlite3.connect("listing.db")
+cur = con.cursor()
 
 
 for manufacturer in data.keys():
@@ -35,4 +38,7 @@ for manufacturer in data.keys():
                 except:
                     pass
         datas = pd.DataFrame(datas)
-        import ipdb; ipdb.set_trace()
+        datas['date_retrieved'] = str(datetime.now())
+
+        cur.executemany("INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?)", datas.values.tolist())
+        con.commit()
