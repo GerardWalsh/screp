@@ -11,10 +11,13 @@ from utils import (
     find_total_pages,
     get_ad_details,
     insert_ads,
-    get_soup
+    get_soup,
 )
+
 target_site = "autotrader"
-url_patterns = {"autotrader": "https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber=1"}
+url_patterns = {
+    "autotrader": "https://www.autotrader.co.za/cars-for-sale/{manufacturer}/{model}?pagenumber=1"
+}
 data = load_yaml(f"scrape_configs/{target_site}_scrape_targets.yaml")
 driver = setup_driver()
 
