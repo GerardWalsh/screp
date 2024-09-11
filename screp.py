@@ -1,18 +1,14 @@
-import time
 from datetime import datetime
+import time
 
 from bs4 import BeautifulSoup
 import pandas as pd
-import sqlite3
 
-import ipdb
-
-from utils import load_yaml, setup_driver, find_total_ads, find_total_pages, get_ad_details
+from utils import load_yaml, setup_driver, find_total_ads, find_total_pages, get_ad_details, insert_ads
 
 data = load_yaml("scrape_configs/autotrader_scrape_targets.yaml")
 driver = setup_driver()
-con = sqlite3.connect("listing.db")
-cur = con.cursor()
+
 
 
 for manufacturer in data.keys():
@@ -39,6 +35,4 @@ for manufacturer in data.keys():
                     pass
         datas = pd.DataFrame(datas)
         datas['date_retrieved'] = str(datetime.now())
-
-        cur.executemany("INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?)", datas.values.tolist())
-        con.commit()
+        insert_ads(db_name="listings", data=datas)
