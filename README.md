@@ -27,3 +27,10 @@
 * add a test to test if all ads on page pass []
 * add webuycars scraping []
 * add cars.co.za scraping []
+
+## TODO (global picture)
+
+* scheduling
+* separate steps for extracting, transforming & loading
+* monitoring
+* shipping to cloud service (or not local machine)
