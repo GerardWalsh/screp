@@ -15,9 +15,10 @@ from utils import (
     get_all_page_ads,
 )
 
-target_site = "autotrader"
+target_site = "wbc"
 url_patterns = {
-    "autotrader": "https://www.autotrader.co.za/cars-for-sale/{}/{}?pagenumber={}"
+    "autotrader": "https://www.autotrader.co.za/cars-for-sale/{}/{}?pagenumber={}",
+    "wbc": 'https://www.webuycars.co.za/buy-a-car?Make=["{}"]&Model=["{}"]'
 }
 data = load_yaml(f"scrape_configs/{target_site}_scrape_targets.yaml")
 driver = setup_driver()
@@ -27,6 +28,7 @@ for manufacturer in data.keys():
     for model in data[manufacturer]:
         datas = []
         model_url = url_patterns[target_site].format(manufacturer, model, 1)
+        import ipdb; ipdb.set_trace()
         soup = get_soup(driver, model_url, pause=False)
         ad_count = int(soup.select(find_total_ads(soup, "autotrader"))[0].text)
         pages = int(soup.select(find_total_pages(soup, "autotrader"))[-1].text)
