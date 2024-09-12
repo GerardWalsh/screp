@@ -21,13 +21,22 @@ def setup_driver():
 
 
 def find_total_pages(soup, site):
-    total_ads_tags = {"autotrader": '[class^="e-page-number"]'}
+    total_ads_tags = {"autotrader": '[classs^="e-page-number"]'}
     return total_ads_tags[site]
 
 
 def find_total_ads(soup, site):
-    patterns = {"autotrader": '[class^="e-results-total__"]'}
-    return patterns[site]
+    import ipdb; ipdb.set_trace()
+    if site == "autotrader":
+        return  int(soup.select('[class^="e-results-total__"]')[0].text)
+    elif site == "wbc":
+        return int([x.text for x in soup.find_all('div', class_='text-center') if "Showing 1 - " in x.text][0].split("of ")[-1].replace(")", ""))
+    # patterns = {
+    #     "autotrader":,
+    #     "wbc": 
+    #     }
+    # import ipdb; ipdb.set_trace()
+    # return patterns[site](soup)
 
 
 def get_ad_containers(soup, site):
