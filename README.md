@@ -25,3 +25,5 @@
 * insert page data into DB [x]
 * page count doesn't work for lots of pages (model w/ tons of ads) [x]
 * add a test to test if all ads on page pass []
+* add webuycars scraping []
+* add cars.co.za scraping []
