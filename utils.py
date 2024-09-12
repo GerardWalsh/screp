@@ -1,6 +1,8 @@
 from pathlib import Path
 import sqlite3
+import time
 
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
@@ -19,7 +21,7 @@ def setup_driver():
 
 
 def find_total_pages(soup, site):
-    total_ads_tags = {"autotrader": ("li", {"class": "e-page-number"})}
+    total_ads_tags = {"autotrader": '[class^="e-page-number"]'}
     return total_ads_tags[site]
 
 
@@ -49,9 +51,20 @@ def get_ad_details(soup):
 
 
 def insert_ads(db_name: str, data: pd.DataFrame):
-    con = sqlite3.connect("listing.db")
+    con = sqlite3.connect(db_name)
     cur = con.cursor()
     cur.executemany(
-        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?)", data.values.tolist()
+        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.values.tolist()
     )
     con.commit()
+
+
+def get_soup(driver, url, pause=True):
+    driver.get(url)
+    if pause:
+        time.sleep(5)
+    return BeautifulSoup(driver.page_source, "html.parser")
+
+def get_all_page_ads(page_soup, site):
+    if site == "autotrader":
+        return page_soup.select('[class^="b-result-tile__"]')

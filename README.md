@@ -22,5 +22,6 @@
 * pull images from page, store with ad_id []
 * * bit harder for autotrader, rendered dynamically?
 * test data matches expectations []
-* insert page data into DB []
-* page count doesn't work for lots of pages (model w/ tons of ads)
+* insert page data into DB [x]
+* page count doesn't work for lots of pages (model w/ tons of ads) [x]
+* add a test to test if all ads on page pass []
