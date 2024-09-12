@@ -12,7 +12,7 @@ from utils import (
     get_ad_details,
     insert_ads,
     get_soup,
-    get_all_page_ads
+    get_all_page_ads,
 )
 
 target_site = "autotrader"
@@ -34,7 +34,7 @@ for manufacturer in data.keys():
         for i in range(pages):
             if i != 0:
                 print(f"Getting page {i+1} data")
-                model_url = url_patterns[target_site].format(manufacturer, model, i+1)
+                model_url = url_patterns[target_site].format(manufacturer, model, i + 1)
                 soup = get_soup(driver, model_url)
 
             for ad_soup in get_all_page_ads(soup, target_site):

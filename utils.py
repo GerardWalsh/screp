@@ -54,7 +54,8 @@ def insert_ads(db_name: str, data: pd.DataFrame):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
     cur.executemany(
-        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", data.values.tolist()
+        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        data.values.tolist(),
     )
     con.commit()
 
@@ -64,6 +65,7 @@ def get_soup(driver, url, pause=True):
     if pause:
         time.sleep(5)
     return BeautifulSoup(driver.page_source, "html.parser")
+
 
 def get_all_page_ads(page_soup, site):
     if site == "autotrader":
