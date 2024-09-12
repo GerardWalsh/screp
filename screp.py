@@ -28,20 +28,21 @@ for manufacturer in data.keys():
     for model in data[manufacturer]:
         datas = []
         model_url = url_patterns[target_site].format(manufacturer, model, 1)
-        import ipdb; ipdb.set_trace()
-        soup = get_soup(driver, model_url, pause=False)
-        ad_count = int(soup.select(find_total_ads(soup, "autotrader"))[0].text)
-        pages = int(soup.select(find_total_pages(soup, "autotrader"))[-1].text)
+        
+        soup = get_soup(driver, model_url)
+        
+        # ad_count = find_total_ads(soup, target_site)
+        ad_count = 999
+        pages = find_total_pages(soup, target_site)
         print(f"Found {pages} pages and {ad_count} ads for {model}.")
         for i in range(pages):
             if i != 0:
                 print(f"Getting page {i+1} data")
                 model_url = url_patterns[target_site].format(manufacturer, model, i + 1)
                 soup = get_soup(driver, model_url)
-
             for ad_soup in get_all_page_ads(soup, target_site):
                 try:
-                    datas.append(get_ad_details(ad_soup))
+                    datas.append(get_ad_details(ad_soup, target_site))
                 except:
                     pass
         datas = pd.DataFrame(datas)

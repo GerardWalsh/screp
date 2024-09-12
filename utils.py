@@ -1,6 +1,7 @@
 from pathlib import Path
 import sqlite3
 import time
+from math import ceil
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -21,40 +22,67 @@ def setup_driver():
 
 
 def find_total_pages(soup, site):
-    total_ads_tags = {"autotrader": '[classs^="e-page-number"]'}
-    return total_ads_tags[site]
+    if site == "autotrader":
+        return  int(soup.select('[classs^="e-page-number"]')[-1].text)
+    elif site == "wbc":
+        if any(soup.find_all("ul", class_="pagination")):
+            return ceil(
+                int(
+                    [
+                        x.text for x in soup.find_all("div", class_="text-center") if "Showing 1" in x.text
+                        
+                    ][0]
+                    .split("of ")[-1]
+                    .replace(")", "")
+                )
+                / 23
+            )
+        else:
+            return 1
 
 
 def find_total_ads(soup, site):
-    import ipdb; ipdb.set_trace()
     if site == "autotrader":
-        return  int(soup.select('[class^="e-results-total__"]')[0].text)
+        total=  int(soup.select('[class^="e-results-total__"]')[0].text)
     elif site == "wbc":
-        return int([x.text for x in soup.find_all('div', class_='text-center') if "Showing 1 - " in x.text][0].split("of ")[-1].replace(")", ""))
-    # patterns = {
-    #     "autotrader":,
-    #     "wbc": 
-    #     }
-    # import ipdb; ipdb.set_trace()
-    # return patterns[site](soup)
-
+        if any(soup.find_all("ul", class_="pagination")):
+            return int(
+                    [
+                        x.text for x in soup.find_all("div", class_="text-center") if "Showing 1" in x.text
+                        
+                    ][0]
+                    .split("of ")[-1]
+                    .replace(")", "")
+                )
+        else:
+            return 1
+    return total
 
 def get_ad_containers(soup, site):
     patterns = {"autotrader": '[class^="b-result-tile__"]'}
     return soup.select(patterns[site])
 
 
-def get_ad_details(soup):
+def get_ad_details(soup, site):
     data = {}
-    data["ad_id"] = soup.find("a").get("href").split("?")[0].split("/")[-1]
-    for component in ["title", "dealer", "suburb", "price"]:
-        data[component] = soup.select(f'[class^="e-{component}__"]')[0].text.replace(
-            "\xa0", " "
-        )
-    for i, component in enumerate(["transmission", "mileage"]):
-        data[component] = soup.select('[class^="e-summary-icon"]')[-1 - i].text.replace(
-            "\xa0", " "
-        )  # .replace("km", "").replace(" ", "")
+    if site == "autotrader":
+        data["ad_id"] = soup.find("a").get("href").split("?")[0].split("/")[-1]
+        for component in ["title", "dealer", "suburb", "price"]:
+            data[component] = soup.select(f'[class^="e-{component}__"]')[0].text.replace(
+                "\xa0", " "
+            )
+        for i, component in enumerate(["transmission", "mileage"]):
+            data[component] = soup.select('[class^="e-summary-icon"]')[-1 - i].text.replace(
+                "\xa0", " "
+            )
+    elif site == "wbc":
+        data["title"] = soup.select('[class^="description"]')[0].text
+        data["dealer"] = "wbc"
+        data["suburb"] = soup.select('[class^="chip-text"]')[2].text
+        data["price"] = soup.select('[class^="price-text"]')[0].text
+
+        data["transmission"] = "N/A"
+        data["mileage"] = soup.select('[class^="chip-text"]')[0].text
 
     return pd.Series({**data})
 
@@ -79,3 +107,5 @@ def get_soup(driver, url, pause=True):
 def get_all_page_ads(page_soup, site):
     if site == "autotrader":
         return page_soup.select('[class^="b-result-tile__"]')
+    elif site == "wbc":
+        return page_soup.select('[class^="m-2 grid-card-container"]')
