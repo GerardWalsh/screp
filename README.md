@@ -19,14 +19,17 @@
 * parse out: [x]
 * * title, price, mileage, location, dealer info, transmission
 * handle dud advert []
+* pull out ad_id [x]
 * pull images from page, store with ad_id []
 * * bit harder for autotrader, rendered dynamically?
 * test data matches expectations []
 * insert page data into DB [x]
 * page count doesn't work for lots of pages (model w/ tons of ads) [x]
 * add a test to test if all ads on page pass []
-* add webuycars scraping []
+* add webuycars scraping [x]
 * add cars.co.za scraping []
+* check for duplicates in important places 
+* * ad_id
 
 ## TODO (global picture)
 
