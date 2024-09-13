@@ -16,7 +16,7 @@ from utils import (
     any_ads,
 )
 
-target_site = "wbc"
+target_site = "autotrader"
 url_patterns = {
     "autotrader": "https://www.autotrader.co.za/cars-for-sale/{}/{}?pagenumber={}",
     "wbc": 'https://www.webuycars.co.za/buy-a-car?Make=["{}"]&Model=["{}"]&page={}',
@@ -29,6 +29,7 @@ for manufacturer in data.keys():
     for model in data[manufacturer]:
         datas = []
         model_url = url_patterns[target_site].format(manufacturer, model, 1)
+        print(f"Scraping {model_url}")
         soup = get_soup(driver, model_url)
         if not any_ads(soup, target_site):
             print(f"No ads for {model} at {model_url}")
