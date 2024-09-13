@@ -117,7 +117,7 @@ def get_all_page_ads(page_soup, site):
 
 def any_ads(page_soup, site):
     if site == "wbc":
-        return not any(page_soup.select('[uti]'))
+        return not any(page_soup.select('[class^="no-results-message"]'))
     if site == "autotrader":
         return True
 
