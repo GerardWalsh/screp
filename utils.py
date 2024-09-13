@@ -23,7 +23,7 @@ def setup_driver():
 
 def find_total_pages(soup, site):
     if site == "autotrader":
-        return int(soup.select('[classs^="e-page-number"]')[-1].text)
+        return int(soup.select('[class^="e-page-number"]')[-1].text)
     elif site == "wbc":
         if any(soup.find_all("ul", class_="pagination")):
             return ceil(
@@ -118,3 +118,14 @@ def get_all_page_ads(page_soup, site):
 def any_ads(page_soup, site):
     if site == "wbc":
         return not any(page_soup.select('[class^="no-results-message"]'))
+    if site == "autotrader":
+        return True
+
+
+def pull_all_data(db_name):
+    con = sqlite3.connect(db_name)
+    cur = con.cursor()
+    res = cur.execute("SELECT * FROM listings")
+    df = pd.DataFrame(res.fetchall())
+    df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model"]
+    return df

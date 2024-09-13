@@ -1,7 +1,7 @@
 Alfa Romeo:
   - Giulia
 Audi: 
-  # - rs4 # TODO: should add this back
+  - rs4 # TODO: should add this back
   - A6
   - S4
   - R8
@@ -23,8 +23,8 @@ BMW:
 Honda: 
   - S2000
 Nissan: 
-#   - 350z
-#   - 370z
+  - 350z
+  - 370z
   - GT-R
 Porsche:
   - Cayman

@@ -1,7 +1,5 @@
 from datetime import datetime
-import time
 
-from bs4 import BeautifulSoup
 import pandas as pd
 
 from utils import (
@@ -29,6 +27,7 @@ for manufacturer in data.keys():
     for model in data[manufacturer]:
         datas = []
         model_url = url_patterns[target_site].format(manufacturer, model, 1)
+        print(f"Scraping {model_url}")
         soup = get_soup(driver, model_url)
         if not any_ads(soup, target_site):
             print(f"No ads for {model} at {model_url}")
@@ -51,9 +50,6 @@ for manufacturer in data.keys():
         datas["date_retrieved"] = str(datetime.now())
         datas["manufacturer"] = manufacturer
         datas["model"] = model
-        import ipdb
-
-        ipdb.set_trace()
         insert_ads(db_name="listing.db", data=datas)
 
 driver.close()
