@@ -1,7 +1,5 @@
 from datetime import datetime
-import time
 
-from bs4 import BeautifulSoup
 import pandas as pd
 
 from utils import (
@@ -16,7 +14,7 @@ from utils import (
     any_ads,
 )
 
-target_site = "autotrader"
+target_site = "wbc"
 url_patterns = {
     "autotrader": "https://www.autotrader.co.za/cars-for-sale/{}/{}?pagenumber={}",
     "wbc": 'https://www.webuycars.co.za/buy-a-car?Make=["{}"]&Model=["{}"]&page={}',
@@ -52,9 +50,6 @@ for manufacturer in data.keys():
         datas["date_retrieved"] = str(datetime.now())
         datas["manufacturer"] = manufacturer
         datas["model"] = model
-        import ipdb
-
-        ipdb.set_trace()
         insert_ads(db_name="listing.db", data=datas)
 
 driver.close()
