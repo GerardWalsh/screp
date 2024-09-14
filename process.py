@@ -73,34 +73,6 @@ def get_the_data(group):
     )
 
 
-df = pull_all_data("listing.db")
-df.model = df.model.fillna("").str.lower()
-df["submodel"] = ""
-df["generation"] = ""
-df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0])
-
-
-df["site"] = "webuycars"
-df.loc[~df.dealer.eq("wbc"), "site"] = "autotrader"
-
-
-
-df.loc[
-    ~df[["model", "title"]]
-    .fillna("")
-    .apply(lambda x: x.model in x.title.lower(), axis=1)
-].model.unique()
-
-df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
-df.to_csv("data.csv")
-
-df = pd.read_csv("data.csv")
-for col in ["year", "price", "mileage"]:
-    df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
-
-df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
-df.to_csv("frontend_data.csv")
-
 # TODO: special models are their own model, i.e. RS6 != A6 (mostly webuycars data)
 # GR86 in wbc is currently labelled as 86
 # Aggregate Prado models
@@ -169,3 +141,38 @@ def assign_generation(df, generation_mapping):
                 df.year.between(yr_min, yr_max) & (df.model == model), "generation"
             ] = gen
     return df
+
+
+if __name__ == "__main__":
+    df = pull_all_data("listing.db")
+    df.model = df.model.fillna("").str.lower()
+    df["submodel"] = ""
+    df["generation"] = ""
+    df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0])
+
+
+    df["site"] = "webuycars"
+    df.loc[~df.dealer.eq("wbc"), "site"] = "autotrader"
+
+    df = create_image_url_col(df)
+    df = assign_generation(df, model_gen_year_mapping)
+    df = cleanup_model_names(df, "none_for_now")
+
+
+
+    df.loc[
+        ~df[["model", "title"]]
+        .fillna("")
+        .apply(lambda x: x.model in x.title.lower(), axis=1)
+    ].model.unique()
+
+
+    df.to_csv("data.csv")
+
+    df = pd.read_csv("data.csv")
+    for col in ["year", "price", "mileage"]:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
+
+    df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
+    df.to_csv("frontend_data.csv")
+    import ipdb; ipdb.set_trace()
