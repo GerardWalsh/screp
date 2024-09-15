@@ -36,8 +36,8 @@ def get_the_data(group):
     year = group["year"].unique()[0]
     model = group["model"].unique()[0]
     manu = group["manufacturer"].unique()[0]
-    min = int(group["price"].fillna(999).min())
-    max = int(group["price"].fillna(999).max())
+    min = group["price"].min()
+    max = group["price"].max()
     ad_id = group["ad_id"].unique()[0]
     time_online = (
         pd.to_datetime(group["date_retrieved"]).max()
@@ -78,11 +78,7 @@ def get_the_data(group):
 # Aggregate Prado models
 # fillna on site to be autotrader
 # Aggregate porsche cayman
-# except Exception as exception:
-#     traceback.print_exception(exception)
-#     import ipdb
 
-#     ipdb.set_trace()
 
 def create_image_url_col(df):
     df.loc[df.site.eq("webuycars"), "image_url"] = (
@@ -99,6 +95,7 @@ def create_image_url_col(df):
         + "/Crop800x600"
     )
     return df
+
 
 def cleanup_model_names(df, model_name_mapping):
     df.loc[df.model.eq("1-series"), "model"] = "1 series"
@@ -133,7 +130,8 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.model.eq("c-class/c63/search"), "model"] = "c class"
     return df
 
-def assign_generation(df, generation_mapping):  
+
+def assign_generation(df, generation_mapping):
     for model in generation_mapping.keys():
         for gen in generation_mapping[model]:
             yr_min, yr_max = generation_mapping[model][gen]
@@ -143,22 +141,39 @@ def assign_generation(df, generation_mapping):
     return df
 
 
+def cleanup_price(df):
+    df.loc[df.site.eq("webuycars"), "price"] = (
+        df.loc[df.site.eq("webuycars"), "price"]
+        .str.replace("R ", "")
+        .str.replace(" ", "")
+    )
+    df.loc[df.site.eq("auotrader"), "price"] = (
+        df.loc[df.site.eq("autotrader"), "price"]
+        .str.split("R")
+        .str[1]
+        .str.replace(" ", "")
+    )
+    return df
+
+
+def assign_website(df):
+    df["site"] = "webuycars"
+    df.loc[~df.dealer.eq("wbc"), "site"] = "autotrader"
+    return df
+
+
 if __name__ == "__main__":
     df = pull_all_data("listing.db")
-    df.model = df.model.fillna("").str.lower()
+    df.model = df.model.str.lower()
     df["submodel"] = ""
     df["generation"] = ""
     df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0])
 
-
-    df["site"] = "webuycars"
-    df.loc[~df.dealer.eq("wbc"), "site"] = "autotrader"
-
+    df = cleanup_price(df)
+    df = assign_website(df)
     df = create_image_url_col(df)
     df = assign_generation(df, model_gen_year_mapping)
     df = cleanup_model_names(df, "none_for_now")
-
-
 
     df.loc[
         ~df[["model", "title"]]
@@ -166,13 +181,12 @@ if __name__ == "__main__":
         .apply(lambda x: x.model in x.title.lower(), axis=1)
     ].model.unique()
 
-
     df.to_csv("data.csv")
 
     df = pd.read_csv("data.csv")
+    df = df.dropna(subset="price")
     for col in ["year", "price", "mileage"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
+        df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
     df.to_csv("frontend_data.csv")
-    import ipdb; ipdb.set_trace()
