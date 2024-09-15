@@ -14,7 +14,7 @@ from utils import (
     any_ads,
 )
 
-target_site = "wbc"
+target_site = input("autotrader or wbc: ")
 url_patterns = {
     "autotrader": "https://www.autotrader.co.za/cars-for-sale/{}/{}?pagenumber={}",
     "wbc": 'https://www.webuycars.co.za/buy-a-car?Make=["{}"]&Model=["{}"]&page={}',
