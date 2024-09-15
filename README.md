@@ -30,6 +30,10 @@
 * add cars.co.za scraping []
 * check for duplicates in important places 
 * * ad_id
+* Get app running again [x]
+* resolve pricing issue in timeseries plot [x]
+* correct id for Image URL on both sites []
+* cleanup old DB & insert into new DB []
 
 ## TODO (global picture)
 
