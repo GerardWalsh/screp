@@ -1,64 +1,9 @@
 import streamlit as st
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
 
-from datetime import timedelta, date, time
-from datetime import datetime
-
 st.set_page_config(layout="wide")
-
-
-# def get_the_data(group):
-#     year = group["year"].unique()[0]
-#     model = group["model"].unique()[0]
-#     manu = group["manufacturer"].unique()[0]
-#     min = int(group["price"].fillna(999).min())
-#     max = int(group["price"].fillna(999).max())
-#     link = group["link"].unique()[0]
-#     time_online = (
-#         pd.to_datetime(group["scrape_time"]).max()
-#         - pd.to_datetime(group["scrape_time"]).min()
-#     )
-#     sold = pd.to_datetime(group["scrape_time"].fillna("").max()) < (
-#         datetime.now() - timedelta(days=1)
-#     )
-#     site = group["site"].unique()[0]
-#     last_seen = pd.to_datetime(group["scrape_time"]).max()
-#     title = group["title"].unique().tolist()[0]
-#     generation = group["generation"].unique().tolist()[0]
-#     image_url = group["image_url"].fillna("no image").unique().tolist()[-1]
-#     return pd.Series(
-#         {
-#             "manufacturer": manu,
-#             "model": model,
-#             "generation": generation,
-#             "year": year,
-#             "min_price": min,
-#             "max_price": max,
-#             "time_online": time_online,
-#             "last_seen": last_seen,
-#             "mileage": group["mileage"].fillna(999).astype(int).unique().tolist()[0],
-#             "sold": sold,
-#             "site": site,
-#             "title": title,
-#             "link": link,
-#             "image_url": image_url,
-#         }
-#     )
-
-
-# Load the CSV file
-# @st.cache
-# def load_data():
-#     df = pd.read_csv("data.csv")
-#     for col in ["year", "price", "mileage"]:
-#         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(999).astype(int)
-
-#     df = df.groupby("link").apply(get_the_data).reset_index(drop=True)
-#     df.to_csv("frontend_data.csv")
-#     return df
 
 
 def main():
@@ -156,7 +101,7 @@ def main():
                     "mileage",
                     "status",
                     "time_online",
-                    "link",
+                    # "link",
                     "site",
                     "date_listed",
                     "last_seen",
@@ -179,16 +124,19 @@ def main():
         )
 
         st.write("Sold vs listed prices, against year")
+        print(filtered_df.shape, filtered_df.columns)
+        print(df.date_listed)
+        print(df.max_price)
         if "max_price" in df.columns and "year" in df.columns:
-            avg_price_per_year = (
-                filtered_df.groupby(["year", "status"])["max_price"].mean().reset_index()
-            )
-            color_discrete_map = {
-                1: "rgb(255,0,0)",
-                2: "rgb(0,255,0)",
-            }
+            # avg_price_per_year = (
+            #     filtered_df.groupby(["year", "status"])["max_price"].mean().reset_index()
+            # )
+            # color_discrete_map = {
+            #     1: "rgb(255,0,0)",
+            #     2: "rgb(0,255,0)",
+            # }
             fig = px.scatter(
-                filtered_df.assign(),
+                filtered_df,
                 x="date_listed",
                 y="max_price",
                 color="status",
