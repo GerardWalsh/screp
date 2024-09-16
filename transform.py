@@ -130,6 +130,7 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.model.eq("prado"), "model"] = "land-cruiser-prado"
     df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
     df.loc[df.model.eq("c-class/c63/search"), "model"] = "c class"
+    df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
     return df
 
 
