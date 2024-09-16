@@ -3,7 +3,6 @@ from pathlib import Path
 import pandas as pd
 from utils import pull_all_data
 from datetime import timedelta, datetime
-import traceback
 
 data_dir = Path("data")
 
@@ -150,7 +149,7 @@ def cleanup_price(df):
         .str.replace("R ", "")
         .str.replace(" ", "")
     )
-    df.loc[df.site.eq("auotrader"), "price"] = (
+    df.loc[df.site.eq("autotrader"), "price"] = (
         df.loc[df.site.eq("autotrader"), "price"]
         .str.split("R")
         .str[1]
@@ -165,6 +164,11 @@ def assign_website(df):
     return df
 
 
+def cleanup_mileage(df):
+    df['mileage'] = pd.to_numeric(df['mileage'].str.lower().str.replace("km", "").str.replace(" ", ""), errors='coerce')
+    return df
+
+
 if __name__ == "__main__":
     df = pull_all_data("listing.db")
     df.model = df.model.str.lower()
@@ -174,6 +178,7 @@ if __name__ == "__main__":
 
     df = assign_website(df)
     df = cleanup_price(df)
+    df = cleanup_mileage(df)
     df = create_image_url_col(df)
     df = assign_generation(df, model_gen_year_mapping)
     df = cleanup_model_names(df, "none_for_now")
@@ -187,8 +192,8 @@ if __name__ == "__main__":
     # this is silly
     df.to_csv(data_dir / "data.csv")
     df = pd.read_csv(data_dir / "data.csv")
-    
-    df = df.dropna(subset="price")
+
+    df = df.dropna(subset=["price", 'mileage'])
     for col in ["year", "price", "mileage"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 

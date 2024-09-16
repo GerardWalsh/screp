@@ -124,9 +124,6 @@ def main():
         )
 
         st.write("Sold vs listed prices, against year")
-        print(filtered_df.shape, filtered_df.columns)
-        print(df.date_listed)
-        print(df.max_price)
         if "max_price" in df.columns and "year" in df.columns:
             # avg_price_per_year = (
             #     filtered_df.groupby(["year", "status"])["max_price"].mean().reset_index()
