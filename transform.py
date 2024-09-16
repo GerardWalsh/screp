@@ -1,8 +1,11 @@
+from pathlib import Path
+
 import pandas as pd
 from utils import pull_all_data
 from datetime import timedelta, datetime
 import traceback
 
+data_dir = Path("data")
 
 model_gen_year_mapping = {
     "911": {
@@ -169,8 +172,8 @@ if __name__ == "__main__":
     df["generation"] = ""
     df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0])
 
-    df = cleanup_price(df)
     df = assign_website(df)
+    df = cleanup_price(df)
     df = create_image_url_col(df)
     df = assign_generation(df, model_gen_year_mapping)
     df = cleanup_model_names(df, "none_for_now")
@@ -181,12 +184,13 @@ if __name__ == "__main__":
         .apply(lambda x: x.model in x.title.lower(), axis=1)
     ].model.unique()
 
-    df.to_csv("data.csv")
-
-    df = pd.read_csv("data.csv")
+    # this is silly
+    df.to_csv(data_dir / "data.csv")
+    df = pd.read_csv(data_dir / "data.csv")
+    
     df = df.dropna(subset="price")
     for col in ["year", "price", "mileage"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
-    df.to_csv("frontend_data.csv")
+    df.to_csv(data_dir / "frontend_data.csv")
