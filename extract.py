@@ -45,11 +45,14 @@ for manufacturer in data.keys():
                 try:
                     datas.append(get_ad_details(ad_soup, target_site))
                 except:
+                    # import ipdb; ipdb.set_trace()?
                     pass
+        # import ipdb; ipdb.set_trace()
         datas = pd.DataFrame(datas)
         datas["date_retrieved"] = str(datetime.now())
         datas["manufacturer"] = manufacturer
         datas["model"] = model
+        # ipdb.set_trace()
         insert_ads(db_name="listing.db", data=datas)
 
 driver.close()

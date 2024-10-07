@@ -89,7 +89,6 @@ def get_ad_details(soup, site):
         data["transmission"] = "N/A"
         data["mileage"] = soup.select('[class^="chip-text"]')[0].text
         data['image_url'] = data['ad_id']
-
     return pd.Series({**data})
 
 
@@ -97,7 +96,7 @@ def insert_ads(db_name: str, data: pd.DataFrame):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
     cur.executemany(
-        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO listings (ad_id, title, dealer, suburb, price, transmission, mileage, image_url, date_retrieved,  manufacturer, model) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         data.values.tolist(),
     )
     con.commit()
@@ -129,5 +128,5 @@ def pull_all_data(db_name):
     cur = con.cursor()
     res = cur.execute("SELECT * FROM listings")
     df = pd.DataFrame(res.fetchall())
-    df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model"]
+    df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model", "image_url"]
     return df

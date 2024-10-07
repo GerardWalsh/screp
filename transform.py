@@ -53,7 +53,7 @@ def get_the_data(group):
     date_scraped = pd.to_datetime(group["date_retrieved"]).min()
     title = group["title"].unique().tolist()[0]
     generation = group["generation"].unique().tolist()[0]
-    image_url = group["image_url"].fillna("no image").unique().tolist()[-1]
+    image_url = group["image_url"].unique().tolist()[-1] # uh no, won't work
     return pd.Series(
         {
             "manufacturer": manu,
@@ -83,17 +83,19 @@ def get_the_data(group):
 
 
 def create_image_url_col(df):
+    import ipdb; ipdb.set_trace()
+    df['image_url'] = df['image_url'].fillna("")
     df.loc[df.site.eq("webuycars"), "image_url"] = (
         "https://photos.webuycars.co.za/photobooth/"
-        + df.loc[df.site.eq("webuycars")].ad_id
+        + df.loc[df.site.eq("webuycars"), "ad_id"]
         + "/Images/"
-        + df.loc[df.site.eq("webuycars")].ad_id
+        + df.loc[df.site.eq("webuycars"), "ad_id"]
         + "0.webp"
     )
 
     df.loc[df.site.eq("autotrader"), "image_url"] = (
         "https://img.autotrader.co.za/"
-        + df.loc[df.site.eq("autotrader"), "ad_id"]
+        + df.loc[df.site.eq("autotrader"), "image_url"]
         + "/Crop800x600"
     )
     return df
@@ -172,6 +174,7 @@ def cleanup_mileage(df):
 
 if __name__ == "__main__":
     df = pull_all_data("listing.db")
+    import ipdb; ipdb.set_trace()
     df.model = df.model.str.lower()
     df["submodel"] = ""
     df["generation"] = ""
@@ -180,6 +183,7 @@ if __name__ == "__main__":
     df = assign_website(df)
     df = cleanup_price(df)
     df = cleanup_mileage(df)
+    ipdb.set_trace()
     df = create_image_url_col(df)
     df = assign_generation(df, model_gen_year_mapping)
     df = cleanup_model_names(df, "none_for_now")
