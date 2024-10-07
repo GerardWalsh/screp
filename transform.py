@@ -83,7 +83,6 @@ def get_the_data(group):
 
 
 def create_image_url_col(df):
-    import ipdb; ipdb.set_trace()
     df['image_url'] = df['image_url'].fillna("")
     df.loc[df.site.eq("webuycars"), "image_url"] = (
         "https://photos.webuycars.co.za/photobooth/"
@@ -174,7 +173,6 @@ def cleanup_mileage(df):
 
 if __name__ == "__main__":
     df = pull_all_data("listing.db")
-    import ipdb; ipdb.set_trace()
     df.model = df.model.str.lower()
     df["submodel"] = ""
     df["generation"] = ""
@@ -183,7 +181,6 @@ if __name__ == "__main__":
     df = assign_website(df)
     df = cleanup_price(df)
     df = cleanup_mileage(df)
-    ipdb.set_trace()
     df = create_image_url_col(df)
     df = assign_generation(df, model_gen_year_mapping)
     df = cleanup_model_names(df, "none_for_now")
