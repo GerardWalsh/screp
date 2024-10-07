@@ -78,6 +78,7 @@ def get_ad_details(soup, site):
             data[component] = soup.select('[class^="e-summary-icon"]')[
                 -1 - i
             ].text.replace("\xa0", " ")
+        data['image_url'] = soup.select('[class^="e-image__"]')[0].find("img")['src'].split("/")[-2]
     elif site == "wbc":
         data["ad_id"] = soup.find("div", class_="grid-card").get("id").split("-")[-1]
         data["title"] = soup.select('[class^="description"]')[0].text
@@ -87,6 +88,7 @@ def get_ad_details(soup, site):
 
         data["transmission"] = "N/A"
         data["mileage"] = soup.select('[class^="chip-text"]')[0].text
+        data['image_url'] = data['ad_id']
 
     return pd.Series({**data})
 
@@ -95,7 +97,7 @@ def insert_ads(db_name: str, data: pd.DataFrame):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
     cur.executemany(
-        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO listings VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         data.values.tolist(),
     )
     con.commit()
