@@ -176,13 +176,16 @@ if __name__ == "__main__":
     df.model = df.model.str.lower()
     df["submodel"] = ""
     df["generation"] = ""
-    df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0])
-    
+
+    df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0], errors="coerce")
+    print(f"Dropping {df['year'].isna().sum()} entries with NaN for year")
+    df = df.dropna(subset='year')
+    df['year'] = df.year.astype(int)
 
     df.loc[df.title.str.contains("911"), "model"] = "911"
     df.loc[df.title.str.lower().str.contains("360") & df.title.str.lower().str.contains("ferrari"), "model"] = "360"
 
-    import ipdb; ipdb.set_trace()
+
 
     df = assign_website(df)
     df = cleanup_price(df)

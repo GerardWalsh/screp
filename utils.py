@@ -71,24 +71,17 @@ def get_ad_containers(soup, site):
 def get_ad_details(soup, site):
     data = {}
     if site == "autotrader":
-        # import ipdb; ipdb.set_trace()
         if (soup['resultType'] == 1) & ('price' in soup.keys()):
-            from pprint import pprint
-            # pprint(soup)
-
             data["ad_id"] = soup['listingId']
-            for component in ["price", "registrationYear"]:
-                try:
-                    data[component] = str(soup[component]).replace("\xa0", " ")
-                except:
-                    import ipdb; ipdb.set_trace()
-            
+            data['title'] = str(soup['registrationYear']) +  " " + soup['makeModelLongVariant']
+            data['dealer'] = soup['dealerName']
+            data['suburb'] = soup['dealerCityName']
+            data["price"] = str(soup["price"]).replace("\xa0", " ")
+            data['transmission'] = soup['summaryIcons'][-1]['text']
             data['mileage'] = soup['summaryIcons'][1]['text'].replace("\xa0", " ")
-            data['transmission'] = soup['summaryIcons'][2]['text']
-
             data['image_url'] = soup['imageUrl']
-            pprint(pd.Series({**data}))
-            return pd.Series({**data})
+            data = pd.Series({**data})
+            return data
     elif site == "wbc":
         data["ad_id"] = soup.find("div", class_="grid-card").get("id").split("-")[-1]
         data["title"] = soup.select('[class^="description"]')[0].text
@@ -138,7 +131,6 @@ def any_ads(page_soup, site):
 def pull_all_data(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
-    import ipdb; ipdb.set_trace()
     res = cur.execute("SELECT * FROM listings")
     df = pd.DataFrame(res.fetchall())
     df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model", "image_url"]
