@@ -12,6 +12,7 @@ from utils import (
     get_soup,
     get_all_page_ads,
     any_ads,
+    download_files_from_df
 )
 
 target_site = input("autotrader or wbc: ")
@@ -48,7 +49,12 @@ for manufacturer in data.keys():
         datas["manufacturer"] = manufacturer
         datas["model"] = str(model)
         print(f"Inserting {len(datas)} ads into DB.")
-        import ipdb; ipdb.set_trace()
+        datas = (
+        datas
+            .dropna()
+            .drop_duplicates(subset='ad_id')
+                )
+        download_files_from_df(datas, target_site)
         insert_ads(db_name="listing.db", data=datas)
 
 driver.close()
