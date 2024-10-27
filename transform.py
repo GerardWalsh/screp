@@ -177,6 +177,12 @@ if __name__ == "__main__":
     df["submodel"] = ""
     df["generation"] = ""
     df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0])
+    
+
+    df.loc[df.title.str.contains("911"), "model"] = "911"
+    df.loc[df.title.str.lower().str.contains("360") & df.title.str.lower().str.contains("ferrari"), "model"] = "360"
+
+    import ipdb; ipdb.set_trace()
 
     df = assign_website(df)
     df = cleanup_price(df)

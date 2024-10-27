@@ -2,6 +2,8 @@ from pathlib import Path
 import sqlite3
 import time
 from math import ceil
+import re
+import json
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -69,16 +71,24 @@ def get_ad_containers(soup, site):
 def get_ad_details(soup, site):
     data = {}
     if site == "autotrader":
-        data["ad_id"] = soup.find("a").get("href").split("?")[0].split("/")[-1]
-        for component in ["title", "dealer", "suburb", "price"]:
-            data[component] = soup.select(f'[class^="e-{component}__"]')[
-                0
-            ].text.replace("\xa0", " ")
-        for i, component in enumerate(["transmission", "mileage"]):
-            data[component] = soup.select('[class^="e-summary-icon"]')[
-                -1 - i
-            ].text.replace("\xa0", " ")
-        data['image_url'] = soup.select('[class^="e-image__"]')[0].find("img")['src'].split("/")[-2]
+        # import ipdb; ipdb.set_trace()
+        if (soup['resultType'] == 1) & ('price' in soup.keys()):
+            from pprint import pprint
+            # pprint(soup)
+
+            data["ad_id"] = soup['listingId']
+            for component in ["price", "registrationYear"]:
+                try:
+                    data[component] = str(soup[component]).replace("\xa0", " ")
+                except:
+                    import ipdb; ipdb.set_trace()
+            
+            data['mileage'] = soup['summaryIcons'][1]['text'].replace("\xa0", " ")
+            data['transmission'] = soup['summaryIcons'][2]['text']
+
+            data['image_url'] = soup['imageUrl']
+            pprint(pd.Series({**data}))
+            return pd.Series({**data})
     elif site == "wbc":
         data["ad_id"] = soup.find("div", class_="grid-card").get("id").split("-")[-1]
         data["title"] = soup.select('[class^="description"]')[0].text
@@ -111,7 +121,9 @@ def get_soup(driver, url, pause=True):
 
 def get_all_page_ads(page_soup, site):
     if site == "autotrader":
-        return page_soup.select('[class^="b-result-tile__"]')
+        script_tag = page_soup.find_all('script', text=re.compile(r'\breactRender\b'))[-3]
+        data = json.loads(script_tag.getText()[114:-31])
+        return (data['results']['results'] + data['results']['featuredTiles'])
     elif site == "wbc":
         return page_soup.select('[class^="m-2 grid-card-container"]')
 
@@ -126,6 +138,7 @@ def any_ads(page_soup, site):
 def pull_all_data(db_name):
     con = sqlite3.connect(db_name)
     cur = con.cursor()
+    import ipdb; ipdb.set_trace()
     res = cur.execute("SELECT * FROM listings")
     df = pd.DataFrame(res.fetchall())
     df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model", "image_url"]

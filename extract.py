@@ -41,16 +41,20 @@ for manufacturer in data.keys():
                 print(f"Getting page {i+1} data")
                 model_url = url_patterns[target_site].format(manufacturer, model, i + 1)
                 soup = get_soup(driver, model_url)
+            # import ipdb; ipdb.set_trace()
             for ad_soup in get_all_page_ads(soup, target_site):
-                try:
-                    datas.append(get_ad_details(ad_soup, target_site))
-                except:
-                    # import ipdb; ipdb.set_trace()
-                    pass
+                # try:
+                datas.append(get_ad_details(ad_soup, target_site))
+                # except:
+                #     # import ipdb; ipdb.set_trace()
+                #     pass
         datas = pd.DataFrame(datas)
+        # import ipdb; ipdb.set_trace()
         datas["date_retrieved"] = str(datetime.now())
         datas["manufacturer"] = manufacturer
-        datas["model"] = model
-        insert_ads(db_name="listing.db", data=datas)
+        datas["model"] = str(model)
+        print(f"Inserting {len(datas)} ads into DB.")
+        print(datas)
+        # insert_ads(db_name="listing.db", data=datas)
 
 driver.close()
