@@ -42,14 +42,12 @@ for manufacturer in data.keys():
                 model_url = url_patterns[target_site].format(manufacturer, model, i + 1)
                 soup = get_soup(driver, model_url)
             for ad_soup in get_all_page_ads(soup, target_site):
-                try:
-                    datas.append(get_ad_details(ad_soup, target_site))
-                except:
-                    pass
+                datas.append(get_ad_details(ad_soup, target_site))
         datas = pd.DataFrame(datas)
         datas["date_retrieved"] = str(datetime.now())
         datas["manufacturer"] = manufacturer
-        datas["model"] = model
+        datas["model"] = str(model)
+        print(f"Inserting {len(datas)} ads into DB.")
         insert_ads(db_name="listing.db", data=datas)
 
 driver.close()
