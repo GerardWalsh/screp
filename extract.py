@@ -48,6 +48,7 @@ for manufacturer in data.keys():
         datas["manufacturer"] = manufacturer
         datas["model"] = str(model)
         print(f"Inserting {len(datas)} ads into DB.")
+        import ipdb; ipdb.set_trace()
         insert_ads(db_name="listing.db", data=datas)
 
 driver.close()

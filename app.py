@@ -56,13 +56,13 @@ def main():
 
         # Filter dataframe
         if column == "model":
-            # TODO: this splitting is terrible
+            print("filtering on", filter_value)
             filter_value = " ".join(filter_value.split(" ")[1:]).lower()
         elif column == "manufacturer":
             filter_value = filter_value
-        print("filtering on: ", filter_value)
+
         filtered_df = df[df[column] == filter_value]
-        print("0 - shape of filtered df", filtered_df.shape)
+
         if filtered_df.generation.any():
             gen = filtered_df.generation.unique().tolist()
             gen_filter = st.multiselect("Select the generation to filter by", gen)
@@ -77,8 +77,6 @@ def main():
             filtered_df = filtered_df[
                 filtered_df.title.fillna("").str.lower().str.contains(tag_filter.lower())
             ]
-        print("1 - shape of filtered df", filtered_df.shape)
-        print(type(filtered_df.year.min()))
         appointment = st.slider(
             "Model year range:",
             value=(filtered_df.year.min(), filtered_df.year.max()),
@@ -89,7 +87,6 @@ def main():
             filtered_df.year.between(appointment[0], appointment[1])
         ]
         # Display filtered dataframe
-        print("2 - shape of filtered df", filtered_df.shape)
         filtered_df = filtered_df.rename(columns={"sold": "status"})
         filtered_df.status = filtered_df.status.map({False: "available", True: "sold"})
         st.write(f"Filtered Dataframe based on {column} = {filter_value}")

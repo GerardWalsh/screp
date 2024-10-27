@@ -72,7 +72,7 @@ def get_ad_details(soup, site):
     data = {}
     if site == "autotrader":
         if (soup['resultType'] == 1) & ('price' in soup.keys()):
-            data["ad_id"] = soup['listingId']
+            data["ad_id"] = int(soup['listingId'])
             data['title'] = str(soup['registrationYear']) +  " " + soup['makeModelLongVariant']
             data['dealer'] = soup['dealerName']
             data['suburb'] = soup['dealerCityName']
