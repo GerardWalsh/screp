@@ -4,6 +4,8 @@ import time
 from math import ceil
 import re
 import json
+import requests
+import os
 
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -72,7 +74,7 @@ def get_ad_details(soup, site):
     data = {}
     if site == "autotrader":
         if (soup['resultType'] == 1) & ('price' in soup.keys()):
-            data["ad_id"] = soup['listingId']
+            data["ad_id"] = int(soup['listingId'])
             data['title'] = str(soup['registrationYear']) +  " " + soup['makeModelLongVariant']
             data['dealer'] = soup['dealerName']
             data['suburb'] = soup['dealerCityName']
@@ -87,7 +89,11 @@ def get_ad_details(soup, site):
         data["title"] = soup.select('[class^="description"]')[0].text
         data["dealer"] = "wbc"
         data["suburb"] = soup.select('[class^="chip-text"]')[2].text
-        data["price"] = soup.select('[class^="price-text"]')[0].text
+        price = soup.select('[class^="price-text"]')
+        if price:
+            data["price"] = price[0].text
+        else:
+            data['price'] = None
 
         data["transmission"] = "N/A"
         data["mileage"] = soup.select('[class^="chip-text"]')[0].text
@@ -135,3 +141,39 @@ def pull_all_data(db_name):
     df = pd.DataFrame(res.fetchall())
     df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model", "image_url"]
     return df
+
+
+def download_files_from_df(df, save_dir):
+    for _, row in df.iterrows():
+        url = row['image_url']
+        ad_id = row['ad_id']
+        try:           
+            # Extract the filename from the URL
+            if save_dir == 'autotrader':
+                filename = os.path.join(
+                    save_dir, str(ad_id).replace(".0", "") + ".jpg", 
+                    )
+            if save_dir == "wbc":
+                url = (
+                    "https://photos.webuycars.co.za/photobooth/"
+                    + ad_id
+                    + "/Images/"
+                    + ad_id
+                    + "0.webp"
+                )
+                filename = os.path.join(
+                    save_dir, ad_id + ".jpg", 
+                    )
+            # Send a GET request to the URL
+
+            response = requests.get(url)
+            response.raise_for_status()  # Check if the request was successful
+
+            # Write the content to a file
+            with open(filename, 'wb') as file:
+                file.write(response.content)
+            
+            print(f"Downloaded {filename}")
+        
+        except requests.exceptions.RequestException as e:
+            print(f"Failed to download {url}: {e}")

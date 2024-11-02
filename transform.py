@@ -91,10 +91,9 @@ def create_image_url_col(df):
         + df.loc[df.site.eq("webuycars"), "ad_id"]
         + "0.webp"
     )
-
-    df.loc[df.site.eq("autotrader"), "image_url"] = (
+    df.loc[df.site.eq("autotrader") & ~df.image_url.str.contains("https"), "image_url"] = (
         "https://img.autotrader.co.za/"
-        + df.loc[df.site.eq("autotrader"), "image_url"]
+        + df.loc[df.site.eq("autotrader") & ~df.image_url.str.contains("https"), "image_url"]
         + "/Crop800x600"
     )
     return df
@@ -167,7 +166,7 @@ def assign_website(df):
 
 
 def cleanup_mileage(df):
-    df['mileage'] = pd.to_numeric(df['mileage'].str.lower().str.replace("km", "").str.replace(" ", ""), errors='coerce')
+    df['mileage'] = pd.to_numeric(df['mileage'].str.lower().str.replace("km", "").str.replace(" ", ""), errors='coerce', downcast="integer")
     return df
 
 
@@ -186,8 +185,9 @@ if __name__ == "__main__":
     df.loc[df.title.str.lower().str.contains("360") & df.title.str.lower().str.contains("ferrari"), "model"] = "360"
 
 
-
     df = assign_website(df)
+    df['ad_id'] = df['ad_id'].astype(str).str.replace(".0", "")
+
     df = cleanup_price(df)
     df = cleanup_mileage(df)
     df = create_image_url_col(df)
@@ -201,8 +201,8 @@ if __name__ == "__main__":
     ].model.unique()
 
     # this is silly
-    df.to_csv(data_dir / "data.csv")
-    df = pd.read_csv(data_dir / "data.csv")
+    # df.to_csv(data_dir / "data.csv")
+    # df = pd.read_csv(data_dir / "data.csv")
 
     df = df.dropna(subset=["price", 'mileage'])
     for col in ["year", "price", "mileage"]:
