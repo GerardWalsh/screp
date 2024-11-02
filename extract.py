@@ -49,7 +49,6 @@ for manufacturer in data.keys():
         datas["manufacturer"] = manufacturer
         datas["model"] = str(model)
         print(f"Inserting {len(datas)} ads into DB.")
-        # import ipdb; ipdb.set_trace()
         datas = (
         datas
             .dropna(how='all')
