@@ -89,7 +89,11 @@ def get_ad_details(soup, site):
         data["title"] = soup.select('[class^="description"]')[0].text
         data["dealer"] = "wbc"
         data["suburb"] = soup.select('[class^="chip-text"]')[2].text
-        data["price"] = soup.select('[class^="price-text"]')[0].text
+        price = soup.select('[class^="price-text"]')
+        if price:
+            data["price"] = price[0].text
+        else:
+            data['price'] = None
 
         data["transmission"] = "N/A"
         data["mileage"] = soup.select('[class^="chip-text"]')[0].text

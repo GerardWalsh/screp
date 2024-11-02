@@ -173,7 +173,6 @@ def cleanup_mileage(df):
 if __name__ == "__main__":
     df = pull_all_data("listing.db")
     df.model = df.model.str.lower()
-    import ipdb; ipdb.set_trace()
     df["submodel"] = ""
     df["generation"] = ""
 
@@ -206,10 +205,8 @@ if __name__ == "__main__":
     # df = pd.read_csv(data_dir / "data.csv")
 
     df = df.dropna(subset=["price", 'mileage'])
-    ipdb.set_trace()
     for col in ["year", "price", "mileage"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
-    ipdb.set_trace()
     df.to_csv(data_dir / "frontend_data.csv")
