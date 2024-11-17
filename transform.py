@@ -1,10 +1,9 @@
-from pathlib import Path
-
-import pandas as pd
-from utils import pull_all_data
 from datetime import timedelta, datetime
 
-data_dir = Path("data")
+import pandas as pd
+
+from utils import pull_all_data
+
 
 model_gen_year_mapping = {
     "911": {
@@ -75,13 +74,6 @@ def get_the_data(group):
     )
 
 
-# TODO: special models are their own model, i.e. RS6 != A6 (mostly webuycars data)
-# GR86 in wbc is currently labelled as 86
-# Aggregate Prado models
-# fillna on site to be autotrader
-# Aggregate porsche cayman
-
-
 def create_image_url_col(df):
     df['image_url'] = df['image_url'].fillna("")
     df.loc[df.site.eq("webuycars"), "image_url"] = (
@@ -104,6 +96,7 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.model.eq("2-series"), "model"] = "2 series"
     df.loc[df.model.eq("3-series"), "model"] = "3 series"
 
+    # TODO this is a function - accepts manu & model, and assign model as str
     df.loc[
         df.title.str.lower().str.contains("yaris")
         & df.title.str.lower().str.contains("gr"),
@@ -131,6 +124,10 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
     df.loc[df.model.eq("c-class/c63/search"), "model"] = "c class"
     df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
+
+    df.loc[df.title.str.contains("911"), "model"] = "911"
+    df.loc[df.title.str.lower().str.contains("360") & df.title.str.lower().str.contains("ferrari"), "model"] = "360"
+
     return df
 
 
@@ -170,23 +167,29 @@ def cleanup_mileage(df):
     return df
 
 
+def assign_year(df):
+    df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0], errors="coerce")
+    print(f"Dropping {df['year'].isna().sum()} entries with NaN for year")
+    df = df.dropna(subset='year')
+    df['year'] = df.year.astype(int)
+    return df
+
+
+def clean_ad_id(df):
+    df['ad_id'] = df['ad_id'].astype(str).str.replace(".0", "")
+    return df
+
 if __name__ == "__main__":
+    from pathlib import Path
+    
     df = pull_all_data("listing.db")
     df.model = df.model.str.lower()
     df["submodel"] = ""
     df["generation"] = ""
 
-    df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0], errors="coerce")
-    print(f"Dropping {df['year'].isna().sum()} entries with NaN for year")
-    df = df.dropna(subset='year')
-    df['year'] = df.year.astype(int)
-
-    df.loc[df.title.str.contains("911"), "model"] = "911"
-    df.loc[df.title.str.lower().str.contains("360") & df.title.str.lower().str.contains("ferrari"), "model"] = "360"
-
-
+    df = assign_year(df)
     df = assign_website(df)
-    df['ad_id'] = df['ad_id'].astype(str).str.replace(".0", "")
+    df = clean_ad_id(df)
 
     df = cleanup_price(df)
     df = cleanup_mileage(df)
@@ -194,19 +197,25 @@ if __name__ == "__main__":
     df = assign_generation(df, model_gen_year_mapping)
     df = cleanup_model_names(df, "none_for_now")
 
+    # what are we doing here?
     df.loc[
         ~df[["model", "title"]]
         .fillna("")
         .apply(lambda x: x.model in x.title.lower(), axis=1)
     ].model.unique()
 
-    # this is silly
-    # df.to_csv(data_dir / "data.csv")
-    # df = pd.read_csv(data_dir / "data.csv")
-
+    # enforcing certain columns to be numeric
     df = df.dropna(subset=["price", 'mileage'])
     for col in ["year", "price", "mileage"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
+    
+    data_dir = Path("data")
     df.to_csv(data_dir / "frontend_data.csv")
+
+    # TODO: special models are their own model, i.e. RS6 != A6 (mostly webuycars data)
+    # GR86 in wbc is currently labelled as 86
+    # Aggregate Prado models
+    # fillna on site to be autotrader
+    # Aggregate porsche cayman
