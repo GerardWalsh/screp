@@ -214,3 +214,4 @@ if __name__ == "__main__":
 
 # TODO
 # add keyword search to app, with steps to confirm model
+# this script should not do data wrangling - remove all into transform
