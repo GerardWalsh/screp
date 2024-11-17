@@ -52,7 +52,7 @@ def get_the_data(group):
     date_scraped = pd.to_datetime(group["date_retrieved"]).min()
     title = group["title"].unique().tolist()[0]
     generation = group["generation"].unique().tolist()[0]
-    image_url = group["image_url"].unique().tolist()[-1] # uh no, won't work
+    image_url = group["image_url"].unique().tolist()[-1]  # uh no, won't work
     return pd.Series(
         {
             "manufacturer": manu,
@@ -75,7 +75,7 @@ def get_the_data(group):
 
 
 def create_image_url_col(df):
-    df['image_url'] = df['image_url'].fillna("")
+    df["image_url"] = df["image_url"].fillna("")
     df.loc[df.site.eq("webuycars"), "image_url"] = (
         "https://photos.webuycars.co.za/photobooth/"
         + df.loc[df.site.eq("webuycars"), "ad_id"]
@@ -83,9 +83,13 @@ def create_image_url_col(df):
         + df.loc[df.site.eq("webuycars"), "ad_id"]
         + "0.webp"
     )
-    df.loc[df.site.eq("autotrader") & ~df.image_url.str.contains("https"), "image_url"] = (
+    df.loc[
+        df.site.eq("autotrader") & ~df.image_url.str.contains("https"), "image_url"
+    ] = (
         "https://img.autotrader.co.za/"
-        + df.loc[df.site.eq("autotrader") & ~df.image_url.str.contains("https"), "image_url"]
+        + df.loc[
+            df.site.eq("autotrader") & ~df.image_url.str.contains("https"), "image_url"
+        ]
         + "/Crop800x600"
     )
     return df
@@ -126,7 +130,11 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
 
     df.loc[df.title.str.contains("911"), "model"] = "911"
-    df.loc[df.title.str.lower().str.contains("360") & df.title.str.lower().str.contains("ferrari"), "model"] = "360"
+    df.loc[
+        df.title.str.lower().str.contains("360")
+        & df.title.str.lower().str.contains("ferrari"),
+        "model",
+    ] = "360"
 
     return df
 
@@ -163,25 +171,30 @@ def assign_website(df):
 
 
 def cleanup_mileage(df):
-    df['mileage'] = pd.to_numeric(df['mileage'].str.lower().str.replace("km", "").str.replace(" ", ""), errors='coerce', downcast="integer")
+    df["mileage"] = pd.to_numeric(
+        df["mileage"].str.lower().str.replace("km", "").str.replace(" ", ""),
+        errors="coerce",
+        downcast="integer",
+    )
     return df
 
 
 def assign_year(df):
     df["year"] = pd.to_numeric(df["title"].str.split(" ").str[0], errors="coerce")
     print(f"Dropping {df['year'].isna().sum()} entries with NaN for year")
-    df = df.dropna(subset='year')
-    df['year'] = df.year.astype(int)
+    df = df.dropna(subset="year")
+    df["year"] = df.year.astype(int)
     return df
 
 
 def clean_ad_id(df):
-    df['ad_id'] = df['ad_id'].astype(str).str.replace(".0", "")
+    df["ad_id"] = df["ad_id"].astype(str).str.replace(".0", "")
     return df
+
 
 if __name__ == "__main__":
     from pathlib import Path
-    
+
     df = pull_all_data("listing.db")
     df.model = df.model.str.lower()
     df["submodel"] = ""
@@ -205,12 +218,12 @@ if __name__ == "__main__":
     ].model.unique()
 
     # enforcing certain columns to be numeric
-    df = df.dropna(subset=["price", 'mileage'])
+    df = df.dropna(subset=["price", "mileage"])
     for col in ["year", "price", "mileage"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
-    
+
     data_dir = Path("data")
     df.to_csv(data_dir / "frontend_data.csv")
 
