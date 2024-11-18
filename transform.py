@@ -101,10 +101,11 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.model.eq("3-series"), "model"] = "3 series"
 
     # TODO this is a function - accepts manu & model, and assign model as str
-    df = clean_model_name(df, ("yaris", "gr"), "gr yaris")
-    df = clean_model_name(df, ("corolla", "gr"), "gr corolla")
-    df = clean_model_name(df, ("911", "gt2"), "911 gt2")
-    df = clean_model_name(df, ("911", "gt3"), "911 gt3")
+    df = replace_model_name(df, ("yaris", "gr"), "gr yaris")
+    df = replace_model_name(df, ("corolla", "gr"), "gr corolla")
+    df = replace_model_name(df, ("supra", "gr"), "gr supra")
+    df = replace_model_name(df, ("911", "gt2"), "911 gt2")
+    df = replace_model_name(df, ("911", "gt3"), "911 gt3")
 
     df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
 
@@ -175,7 +176,7 @@ def clean_ad_id(df):
     return df
 
 
-def clean_model_name(df, model_phrase_hints: tuple[str, str], model_name):
+def replace_model_name(df, model_phrase_hints: tuple[str, str], model_name):
     df.loc[
         df.title.str.lower().str.contains(model_phrase_hints[0])
         & df.title.str.lower().str.contains(model_phrase_hints[1]),
@@ -211,7 +212,7 @@ if __name__ == "__main__":
     # what are we doing here?
     # oh, these are the problem datas
     # whereby model is not in the title, aka won't come up in model search
-    import ipdb; ipdb.set_trace()
+    # import ipdb; ipdb.set_trace()
     # df.loc[
     #     ~df[["model", "title"]]
     #     .fillna("")
