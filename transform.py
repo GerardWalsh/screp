@@ -95,30 +95,30 @@ def create_image_url_col(df):
     return df
 
 
-def cleanup_model_names(df, model_name_mapping):
+def cleanup_model_names(df):
     df.loc[df.model.eq("1-series"), "model"] = "1 series"
     df.loc[df.model.eq("2-series"), "model"] = "2 series"
     df.loc[df.model.eq("3-series"), "model"] = "3 series"
 
-    # TODO this is a function - accepts manu & model, and assign model as str
     df = replace_model_name(df, ("yaris", "gr"), "gr yaris")
     df = replace_model_name(df, ("corolla", "gr"), "gr corolla")
     df = replace_model_name(df, ("supra", "gr"), "gr supra")
+    df = replace_model_name(df, ("86", "gr"), "gr86")
+
     df = replace_model_name(df, ("911", "gt2"), "911 gt2")
     df = replace_model_name(df, ("911", "gt3"), "911 gt3")
 
-    df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
+    df = replace_model_name(df, ("350", "z"), "350z")
+    df = replace_model_name(df, ("370", "z"), "370z")
+
+    df = replace_model_name(df, ("z4", "m coupe"), "z4 m")
+    df = replace_model_name(df, ("ferrari", "360"), "360")
 
     df.loc[df.model.eq("prado"), "model"] = "land-cruiser-prado"
     df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
     df.loc[df.model.eq("c-class/c63/search"), "model"] = "c class"
     
     df.loc[df.title.str.contains("911"), "model"] = "911"
-    df.loc[
-        df.title.str.lower().str.contains("360")
-        & df.title.str.lower().str.contains("ferrari"),
-        "model",
-    ] = "360"
 
     return df
 
@@ -191,44 +191,33 @@ def enforce_numeric(df, cols: list):
     return df
 
 
+def remove_na(df, cols):
+    for col in cols:
+        print(f"Dropping {df[col].isna().sum()} entries with NaN for {col}")
+        df = df.dropna(subset=col)
+    return df
+
+
 if __name__ == "__main__":
     from pathlib import Path
 
     df = pull_all_data("listing.db")
-    df.model = df.model.str.lower()
+    df.model = df.model.str.lower().astype(str)
     df["submodel"] = ""
     df["generation"] = ""
 
     df = assign_year(df)
     df = assign_website(df)
-    df = clean_ad_id(df)
-
     df = cleanup_price(df)
     df = cleanup_mileage(df)
+    df = remove_na(df, cols=['price', 'mileage', 'year'])
+    df = enforce_numeric(df, cols=["year", "price", "mileage"])
+
+    df = clean_ad_id(df)
     df = create_image_url_col(df)
     df = assign_generation(df, model_gen_year_mapping)
-    df = cleanup_model_names(df, "none_for_now")
-
-    # what are we doing here?
-    # oh, these are the problem datas
-    # whereby model is not in the title, aka won't come up in model search
-    # import ipdb; ipdb.set_trace()
-    # df.loc[
-    #     ~df[["model", "title"]]
-    #     .fillna("")
-    #     .apply(lambda x: x.model in x.title.lower(), axis=1)
-    # ].model.unique()
-
-    # enforcing certain columns to be numeric
-    df = df.dropna(subset=["price", "mileage"])
-    df = enforce_numeric(df, cols=["year", "price", "mileage"])
+    df = cleanup_model_names(df)
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
     data_dir = Path("data")
     df.to_csv(data_dir / "frontend_data.csv")
-
-    # TODO: special models are their own model, i.e. RS6 != A6 (mostly webuycars data)
-    # GR86 in wbc is currently labelled as 86
-    # Aggregate Prado models
-    # fillna on site to be autotrader
-    # Aggregate porsche cayman
