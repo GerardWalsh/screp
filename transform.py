@@ -100,19 +100,19 @@ def cleanup_model_names(df):
     df.loc[df.model.eq("2-series"), "model"] = "2 series"
     df.loc[df.model.eq("3-series"), "model"] = "3 series"
 
-    df = replace_model_name(df, ("yaris", "gr"), "gr yaris")
-    df = replace_model_name(df, ("corolla", "gr"), "gr corolla")
-    df = replace_model_name(df, ("supra", "gr"), "gr supra")
-    df = replace_model_name(df, ("86", "gr"), "gr86")
+    df = two_part_search_replace(df, "model", ("yaris", "gr"), "gr yaris")
+    df = two_part_search_replace(df, "model", ("corolla", "gr"), "gr corolla")
+    df = two_part_search_replace(df, "model", ("supra", "gr"), "gr supra")
+    df = two_part_search_replace(df, "model", ("86", "gr"), "gr86")
 
-    df = replace_model_name(df, ("911", "gt2"), "911 gt2")
-    df = replace_model_name(df, ("911", "gt3"), "911 gt3")
+    df = two_part_search_replace(df, "model", ("911", "gt2"), "911 gt2")
+    df = two_part_search_replace(df, "model", ("911", "gt3"), "911 gt3")
 
-    df = replace_model_name(df, ("350", "z"), "350z")
-    df = replace_model_name(df, ("370", "z"), "370z")
+    df = two_part_search_replace(df, "model", ("350", "z"), "350z")
+    df = two_part_search_replace(df, "model", ("370", "z"), "370z")
 
-    df = replace_model_name(df, ("z4", "m coupe"), "z4 m")
-    df = replace_model_name(df, ("ferrari", "360"), "360")
+    df = two_part_search_replace(df, "model", ("z4", "m coupe"), "z4 m")
+    df = two_part_search_replace(df, "model", ("ferrari", "360"), "360")
 
     df.loc[df.model.eq("prado"), "model"] = "land-cruiser-prado"
     df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
@@ -176,12 +176,12 @@ def clean_ad_id(df):
     return df
 
 
-def replace_model_name(df, model_phrase_hints: tuple[str, str], model_name):
+def two_part_search_replace(df, replace_col, search_val: tuple[str, str], replace):
     df.loc[
-        df.title.str.lower().str.contains(model_phrase_hints[0])
-        & df.title.str.lower().str.contains(model_phrase_hints[1]),
-        "model",
-    ] = model_name
+        df.title.str.lower().str.contains(search_val[0])
+        & df.title.str.lower().str.contains(search_val[1]),
+        replace_col,
+    ] = replace
     return df
 
 
@@ -197,11 +197,26 @@ def remove_na(df, cols):
         df = df.dropna(subset=col)
     return df
 
+def build_display_name(df):
+    df['display_name'] = df['manufacturer'].title() + " " + df['model']
+    return df
+
+def standardize_manufacturer_col(df):
+    df = two_part_search_replace(df, ('alfa', 'romeo'), "Alfa-Romeo")
+    df['manufacturer'] = df['manufacturer'].str.title()
+    
+
+    return df
 
 if __name__ == "__main__":
     from pathlib import Path
 
     df = pull_all_data("listing.db")
+    import ipdb; ipdb.set_trace()
+
+    df = two_part_search_replace(df, "manufacturer", ('alfa', 'romeo'), "Alfa-Romeo")
+    df['manufacturer'] = df['manufacturer'].str.title()
+
     df.model = df.model.str.lower().astype(str)
     df["submodel"] = ""
     df["generation"] = ""
@@ -219,5 +234,9 @@ if __name__ == "__main__":
     df = cleanup_model_names(df)
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
+
+    import ipdb; ipdb.set_trace()
+    df['display_name'] = df['manufacturer'] + " " + df['model']
+    
     data_dir = Path("data")
     df.to_csv(data_dir / "frontend_data.csv")
