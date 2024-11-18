@@ -101,34 +101,17 @@ def cleanup_model_names(df, model_name_mapping):
     df.loc[df.model.eq("3-series"), "model"] = "3 series"
 
     # TODO this is a function - accepts manu & model, and assign model as str
-    df.loc[
-        df.title.str.lower().str.contains("yaris")
-        & df.title.str.lower().str.contains("gr"),
-        "model",
-    ] = "gr yaris"
+    df = clean_model_name(df, ("yaris", "gr"), "gr yaris")
+    df = clean_model_name(df, ("corolla", "gr"), "gr corolla")
+    df = clean_model_name(df, ("911", "gt2"), "911 gt2")
+    df = clean_model_name(df, ("911", "gt3"), "911 gt3")
 
-    df.loc[
-        df.title.str.lower().str.contains("corolla")
-        & df.title.str.lower().str.contains("gr"),
-        "model",
-    ] = "gr corolla"
-
-    df.loc[
-        df.title.str.lower().str.contains("911")
-        & df.title.str.lower().str.contains("gt2"),
-        "model",
-    ] = "911 gt2"
-    df.loc[
-        df.title.str.lower().str.contains("911")
-        & df.title.str.lower().str.contains("gt3"),
-        "model",
-    ] = "911 gt3"
+    df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
 
     df.loc[df.model.eq("prado"), "model"] = "land-cruiser-prado"
     df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
     df.loc[df.model.eq("c-class/c63/search"), "model"] = "c class"
-    df.loc[df.title.str.lower().str.contains("z4 m coupe"), "model"] = "z4 m"
-
+    
     df.loc[df.title.str.contains("911"), "model"] = "911"
     df.loc[
         df.title.str.lower().str.contains("360")
@@ -191,6 +174,14 @@ def clean_ad_id(df):
     df["ad_id"] = df["ad_id"].astype(str).str.replace(".0", "")
     return df
 
+
+def clean_model_name(df, model_phrase_hints: tuple[str, str], model_name):
+    df.loc[
+        df.title.str.lower().str.contains(model_phrase_hints[0])
+        & df.title.str.lower().str.contains(model_phrase_hints[1]),
+        "model",
+    ] = model_name
+    return df
 
 if __name__ == "__main__":
     from pathlib import Path
