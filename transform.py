@@ -44,7 +44,7 @@ def get_the_data(group):
         pd.to_datetime(group["date_retrieved"]).max()
         - pd.to_datetime(group["date_retrieved"]).min()
     )
-    sold = pd.to_datetime(group["date_retrieved"].fillna("").max()) < (
+    status = pd.to_datetime(group["date_retrieved"].fillna("").max()) < (
         datetime.now() - timedelta(days=1)
     )
     site = group["site"].unique()[0]
@@ -65,7 +65,7 @@ def get_the_data(group):
             "last_seen": last_seen,
             "date_listed": date_scraped,
             "mileage": group["mileage"].fillna(999).astype(int).unique().tolist()[0],
-            "sold": sold,
+            "status": status,
             "site": site,
             "title": title,
             "ad_id": ad_id,
@@ -197,25 +197,26 @@ def remove_na(df, cols):
         df = df.dropna(subset=col)
     return df
 
+
 def build_display_name(df):
-    df['display_name'] = df['manufacturer'].title() + " " + df['model']
+    df["display_name"] = df["manufacturer"].title() + " " + df["model"]
     return df
+
 
 def standardize_manufacturer_col(df):
-    df = two_part_search_replace(df, ('alfa', 'romeo'), "Alfa-Romeo")
-    df['manufacturer'] = df['manufacturer'].str.title()
-    
+    df = two_part_search_replace(df, ("alfa", "romeo"), "Alfa-Romeo")
+    df["manufacturer"] = df["manufacturer"].str.title()
 
     return df
+
 
 if __name__ == "__main__":
     from pathlib import Path
 
     df = pull_all_data("listing.db")
-    import ipdb; ipdb.set_trace()
 
-    df = two_part_search_replace(df, "manufacturer", ('alfa', 'romeo'), "Alfa-Romeo")
-    df['manufacturer'] = df['manufacturer'].str.title()
+    df = two_part_search_replace(df, "manufacturer", ("alfa", "romeo"), "Alfa-Romeo")
+    df["manufacturer"] = df["manufacturer"].str.title()
 
     df.model = df.model.str.lower().astype(str)
     df["submodel"] = ""
@@ -235,8 +236,10 @@ if __name__ == "__main__":
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
 
-    import ipdb; ipdb.set_trace()
-    df['display_name'] = df['manufacturer'] + " " + df['model']
-    
+    import ipdb
+
+    ipdb.set_trace()
+    df["display_name"] = df["manufacturer"] + " " + df["model"]
+
     data_dir = Path("data")
     df.to_csv(data_dir / "frontend_data.csv")
