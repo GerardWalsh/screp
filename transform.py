@@ -117,7 +117,7 @@ def cleanup_model_names(df):
     df.loc[df.model.eq("prado"), "model"] = "land-cruiser-prado"
     df.loc[df.manufacturer.eq("alfa romeo"), "manufacturer"] = "alfa-romeo"
     df.loc[df.model.eq("c-class/c63/search"), "model"] = "c class"
-    
+
     df.loc[df.title.str.contains("911"), "model"] = "911"
 
     return df
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     df = assign_website(df)
     df = cleanup_price(df)
     df = cleanup_mileage(df)
-    df = remove_na(df, cols=['price', 'mileage', 'year'])
+    df = remove_na(df, cols=["price", "mileage", "year"])
     df = enforce_numeric(df, cols=["year", "price", "mileage"])
 
     df = clean_ad_id(df)
