@@ -204,9 +204,8 @@ def build_display_name(df):
 
 
 def standardize_manufacturer_col(df):
-    df = two_part_search_replace(df, ("alfa", "romeo"), "Alfa-Romeo")
+    df = two_part_search_replace(df, "manufacturer", ("alfa", "romeo"), "Alfa-Romeo")
     df["manufacturer"] = df["manufacturer"].str.title()
-
     return df
 
 
@@ -215,10 +214,8 @@ if __name__ == "__main__":
 
     df = pull_all_data("listing.db")
 
-    df = two_part_search_replace(df, "manufacturer", ("alfa", "romeo"), "Alfa-Romeo")
-    df["manufacturer"] = df["manufacturer"].str.title()
-
     df.model = df.model.str.lower().astype(str)
+    df = standardize_manufacturer_col(df)
     df["submodel"] = ""
     df["generation"] = ""
 
@@ -235,10 +232,7 @@ if __name__ == "__main__":
     df = cleanup_model_names(df)
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
-
-    import ipdb
-
-    ipdb.set_trace()
+    
     df["display_name"] = df["manufacturer"] + " " + df["model"]
 
     data_dir = Path("data")
