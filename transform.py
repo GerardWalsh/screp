@@ -183,6 +183,13 @@ def clean_model_name(df, model_phrase_hints: tuple[str, str], model_name):
     ] = model_name
     return df
 
+
+def enforce_numeric(df, cols: list):
+    for col in cols:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+    return df
+
+
 if __name__ == "__main__":
     from pathlib import Path
 
@@ -202,19 +209,20 @@ if __name__ == "__main__":
     df = cleanup_model_names(df, "none_for_now")
 
     # what are we doing here?
-    df.loc[
-        ~df[["model", "title"]]
-        .fillna("")
-        .apply(lambda x: x.model in x.title.lower(), axis=1)
-    ].model.unique()
+    # oh, these are the problem datas
+    # whereby model is not in the title, aka won't come up in model search
+    import ipdb; ipdb.set_trace()
+    # df.loc[
+    #     ~df[["model", "title"]]
+    #     .fillna("")
+    #     .apply(lambda x: x.model in x.title.lower(), axis=1)
+    # ].model.unique()
 
     # enforcing certain columns to be numeric
     df = df.dropna(subset=["price", "mileage"])
-    for col in ["year", "price", "mileage"]:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+    df = enforce_numeric(df, cols=["year", "price", "mileage"])
 
     df = df.groupby("ad_id").apply(get_the_data).reset_index(drop=True)
-
     data_dir = Path("data")
     df.to_csv(data_dir / "frontend_data.csv")
 
