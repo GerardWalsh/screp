@@ -61,7 +61,7 @@ def find_total_ads(soup, site):
                 .replace(")", "")
             )
         else:
-            return 1
+            return len(soup.find_all("div", class_="m-2 grid-card-container"))
     return total
 
 
@@ -73,15 +73,17 @@ def get_ad_containers(soup, site):
 def get_ad_details(soup, site):
     data = {}
     if site == "autotrader":
-        if (soup['resultType'] == 1) & ('price' in soup.keys()):
-            data["ad_id"] = int(soup['listingId'])
-            data['title'] = str(soup['registrationYear']) +  " " + soup['makeModelLongVariant']
-            data['dealer'] = soup['dealerName']
-            data['suburb'] = soup['dealerCityName']
+        if (soup["resultType"] == 1) & ("price" in soup.keys()):
+            data["ad_id"] = int(soup["listingId"])
+            data["title"] = (
+                str(soup["registrationYear"]) + " " + soup["makeModelLongVariant"]
+            )
+            data["dealer"] = soup["dealerName"]
+            data["suburb"] = soup["dealerCityName"]
             data["price"] = str(soup["price"]).replace("\xa0", " ")
-            data['transmission'] = soup['summaryIcons'][-1]['text']
-            data['mileage'] = soup['summaryIcons'][1]['text'].replace("\xa0", " ")
-            data['image_url'] = soup['imageUrl']
+            data["transmission"] = soup["summaryIcons"][-1]["text"]
+            data["mileage"] = soup["summaryIcons"][1]["text"].replace("\xa0", " ")
+            data["image_url"] = soup["imageUrl"]
             data = pd.Series({**data})
             return data
     elif site == "wbc":
@@ -93,11 +95,11 @@ def get_ad_details(soup, site):
         if price:
             data["price"] = price[0].text
         else:
-            data['price'] = None
+            data["price"] = None
 
         data["transmission"] = "N/A"
         data["mileage"] = soup.select('[class^="chip-text"]')[0].text
-        data['image_url'] = data['ad_id']
+        data["image_url"] = data["ad_id"]
     return pd.Series({**data})
 
 
@@ -120,9 +122,11 @@ def get_soup(driver, url, pause=True):
 
 def get_all_page_ads(page_soup, site):
     if site == "autotrader":
-        script_tag = page_soup.find_all('script', text=re.compile(r'\breactRender\b'))[-3]
+        script_tag = page_soup.find_all("script", text=re.compile(r"\breactRender\b"))[
+            -3
+        ]
         data = json.loads(script_tag.getText()[114:-31])
-        return (data['results']['results'] + data['results']['featuredTiles'])
+        return data["results"]["results"] + data["results"]["featuredTiles"]
     elif site == "wbc":
         return page_soup.select('[class^="m-2 grid-card-container"]')
 
@@ -139,20 +143,32 @@ def pull_all_data(db_name):
     cur = con.cursor()
     res = cur.execute("SELECT * FROM listings")
     df = pd.DataFrame(res.fetchall())
-    df.columns = ["ad_id", "title", "dealer", "suburb", "price", "transmission", "mileage", "date_retrieved",  "manufacturer", "model", "image_url"]
+    df.columns = [
+        "ad_id",
+        "title",
+        "dealer",
+        "suburb",
+        "price",
+        "transmission",
+        "mileage",
+        "date_retrieved",
+        "manufacturer",
+        "model",
+        "image_url",
+    ]
     return df
 
 
 def download_files_from_df(df, save_dir):
     for _, row in df.iterrows():
-        url = row['image_url']
-        ad_id = row['ad_id']
-        try:           
-            # Extract the filename from the URL
-            if save_dir == 'autotrader':
+        url = row["image_url"]
+        ad_id = row["ad_id"]
+        try:
+            if save_dir == "autotrader":
                 filename = os.path.join(
-                    save_dir, str(ad_id).replace(".0", "") + ".jpg", 
-                    )
+                    save_dir,
+                    str(ad_id).replace(".0", "") + ".jpg",
+                )
             if save_dir == "wbc":
                 url = (
                     "https://photos.webuycars.co.za/photobooth/"
@@ -162,18 +178,15 @@ def download_files_from_df(df, save_dir):
                     + "0.webp"
                 )
                 filename = os.path.join(
-                    save_dir, ad_id + ".jpg", 
-                    )
-            # Send a GET request to the URL
+                    save_dir,
+                    ad_id + ".jpg",
+                )
 
             response = requests.get(url)
-            response.raise_for_status()  # Check if the request was successful
+            response.raise_for_status()
 
-            # Write the content to a file
-            with open(filename, 'wb') as file:
+            with open(filename, "wb") as file:
                 file.write(response.content)
-            
-            print(f"Downloaded {filename}")
-        
+
         except requests.exceptions.RequestException as e:
             print(f"Failed to download {url}: {e}")

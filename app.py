@@ -8,7 +8,6 @@ st.set_page_config(layout="wide")
 
 def main():
     st.title("Cars & stuff")
-    # df = load_data()
     page = st.selectbox(
         "App functionality",
         [
@@ -22,46 +21,13 @@ def main():
     df = pd.read_csv("data/frontend_data.csv", index_col=0)
     df.time_online = pd.to_timedelta(df.time_online).round("1 min")
     df.last_seen = pd.to_datetime(df.last_seen).round("60 min")
-    filter_map = {
-        "model": [
-            " ".join(x).title()
-            for x in sorted(df[["manufacturer", "model"]].value_counts().index.tolist())
-        ],
-        "manufacturer": [
-            "alfa-romeo",
-            "audi",
-            "bmw",
-            "ferrari",
-            "honda",
-            "jaguar",
-            "mclaren",
-            "mercedes-amg",
-            "mercedes-benz",
-            "nissan",
-            "porsche",
-            "renault",
-            "suzuki",
-            "toyota",
-        ],
-    }
+
     df = df.dropna(subset="model")
     if page == "market overview":
-        column = st.selectbox(
-            "Select column to filter by", ["model", "manufacturer", "generation"], index=0
+        model_filter = st.selectbox(
+            f"Select the model to filter by", sorted(df.display_name.unique()), index=8
         )
-        unique_values = filter_map[column]
-        filter_value = st.selectbox(
-            f"Select the {column} to filter by", unique_values, index=8
-        )
-
-        # Filter dataframe
-        if column == "model":
-            print("filtering on", filter_value)
-            filter_value = " ".join(filter_value.split(" ")[1:]).lower()
-        elif column == "manufacturer":
-            filter_value = filter_value
-
-        filtered_df = df[df[column] == filter_value]
+        filtered_df = df[df.display_name.eq(model_filter)]
 
         if filtered_df.generation.any():
             gen = filtered_df.generation.unique().tolist()
@@ -75,34 +41,33 @@ def main():
         )
         if tag_filter:
             filtered_df = filtered_df[
-                filtered_df.title.fillna("").str.lower().str.contains(tag_filter.lower())
+                filtered_df.title.fillna("")
+                .str.lower()
+                .str.contains(tag_filter.lower())
             ]
-        appointment = st.slider(
+
+        year_range = st.slider(
             "Model year range:",
             value=(filtered_df.year.min(), filtered_df.year.max()),
             min_value=1980,
             max_value=2024,
         )
         filtered_df = filtered_df[
-            filtered_df.year.between(appointment[0], appointment[1])
+            filtered_df.year.between(year_range[0], year_range[1])
         ]
-        # Display filtered dataframe
-        filtered_df = filtered_df.rename(columns={"sold": "status"})
         filtered_df.status = filtered_df.status.map({False: "available", True: "sold"})
-        st.write(f"Filtered Dataframe based on {column} = {filter_value}")
+        st.write(f"Data filtered on {model_filter}")
         st.dataframe(
             filtered_df[
                 [
                     "image_url",
                     "title",
-                    # "generation",
                     "min_price",
                     "max_price",
                     "year",
                     "mileage",
                     "status",
                     "time_online",
-                    # "link",
                     "site",
                     "date_listed",
                     "last_seen",
@@ -126,13 +91,6 @@ def main():
 
         st.write("Sold vs listed prices, against year")
         if "max_price" in df.columns and "year" in df.columns:
-            # avg_price_per_year = (
-            #     filtered_df.groupby(["year", "status"])["max_price"].mean().reset_index()
-            # )
-            # color_discrete_map = {
-            #     1: "rgb(255,0,0)",
-            #     2: "rgb(0,255,0)",
-            # }
             fig = px.scatter(
                 filtered_df,
                 x="date_listed",
@@ -146,12 +104,7 @@ def main():
                 },
                 color_discrete_map={"available": "#316295", "sold": "#B82E2E"},
             )
-<<<<<<< Updated upstream
-            event = st.plotly_chart(fig, key="iris", on_select="rerun")
-            # event
-=======
             _ = st.plotly_chart(fig, key="iris", on_select="rerun")
->>>>>>> Stashed changes
             plt.title("Average Price Against Year")
             plt.xlabel("Year")
             plt.ylabel("Average Price")
@@ -218,3 +171,4 @@ if __name__ == "__main__":
 
 # TODO
 # add keyword search to app, with steps to confirm model
+# this script should not do data wrangling - remove all into transform
