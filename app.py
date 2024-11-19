@@ -146,8 +146,12 @@ def main():
                 },
                 color_discrete_map={"available": "#316295", "sold": "#B82E2E"},
             )
+<<<<<<< Updated upstream
             event = st.plotly_chart(fig, key="iris", on_select="rerun")
             # event
+=======
+            _ = st.plotly_chart(fig, key="iris", on_select="rerun")
+>>>>>>> Stashed changes
             plt.title("Average Price Against Year")
             plt.xlabel("Year")
             plt.ylabel("Average Price")
