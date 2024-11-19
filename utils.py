@@ -61,7 +61,7 @@ def find_total_ads(soup, site):
                 .replace(")", "")
             )
         else:
-            return 1
+            return len(soup.find_all("div", class_="m-2 grid-card-container"))
     return total
 
 

@@ -12,7 +12,7 @@ from utils import (
     get_soup,
     get_all_page_ads,
     any_ads,
-    download_files_from_df
+    download_files_from_df,
 )
 
 target_site = input("autotrader or wbc: ")
@@ -33,8 +33,8 @@ for manufacturer in data.keys():
         if not any_ads(soup, target_site):
             print(f"No ads for {model} at {model_url}")
             continue
-        # ad_count = find_total_ads(soup, target_site)
-        ad_count = 999
+        ad_count = find_total_ads(soup, target_site)
+        # ad_count = 999
         pages = find_total_pages(soup, target_site)
         print(f"Found {pages} pages and {ad_count} ads for {model}.")
         for i in range(pages):
@@ -44,18 +44,14 @@ for manufacturer in data.keys():
                 soup = get_soup(driver, model_url)
             for ad_soup in get_all_page_ads(soup, target_site):
                 scraped_data.append(get_ad_details(ad_soup, target_site))
-    
+
         scraped_df = pd.DataFrame(scraped_data)
         scraped_df["date_retrieved"] = str(datetime.now())
         scraped_df["manufacturer"] = manufacturer
         scraped_df["model"] = str(model)
-        print(f"Inserting {len(scraped_df)} ads into DB.")
-        scraped_df = (
-            scraped_df
-            .dropna(how='all')
-            .drop_duplicates(subset='ad_id')
-                )
+        scraped_df = scraped_df.dropna(how="all").drop_duplicates(subset="ad_id")
         download_files_from_df(scraped_df, target_site)
+        print(f"Inserting {len(scraped_df)} ads into DB.")
         insert_ads(db_name="listing.db", data=scraped_df)
 
 driver.close()
