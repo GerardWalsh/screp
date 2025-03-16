@@ -73,19 +73,22 @@ def get_ad_containers(soup, site):
 def get_ad_details(soup, site):
     data = {}
     if site == "autotrader":
-        if (soup["resultType"] == 1) & ("price" in soup.keys()):
-            data["ad_id"] = int(soup["listingId"])
-            data["title"] = (
-                str(soup["registrationYear"]) + " " + soup["makeModelLongVariant"]
-            )
-            data["dealer"] = soup["dealerName"]
-            data["suburb"] = soup["dealerCityName"]
-            data["price"] = str(soup["price"]).replace("\xa0", " ")
-            data["transmission"] = soup["summaryIcons"][-1]["text"]
-            data["mileage"] = soup["summaryIcons"][1]["text"].replace("\xa0", " ")
-            data["image_url"] = soup["imageUrl"]
-            data = pd.Series({**data})
-            return data
+        import ipdb; ipdb.set_trace()
+        # if (soup["resultType"] == 1) & ("price" in soup.keys()):
+        #     data["ad_id"] = int(soup["listingId"])
+        #     data["title"] = (
+        #         str(soup["registrationYear"]) + " " + soup["makeModelLongVariant"]
+        #     )
+        #     data["dealer"] = soup["dealerName"]
+        #     data["suburb"] = soup["dealerCityName"]
+        #     data["price"] = str(soup["price"]).replace("\xa0", " ")
+        #     data["transmission"] = soup["summaryIcons"][-1]["text"]
+        #     data["mileage"] = soup["summaryIcons"][1]["text"].replace("\xa0", " ")
+        #     data["image_url"] = soup["imageUrl"]
+        #     data = pd.Series({**data})
+        data['ad_id'] = soup.find('a')['href'].split("/")[-1].split("?")[0]
+        data['title'] = soup.find('span', class_=re.compile('e-title__')).text.strip()
+        return data
     elif site == "wbc":
         data["ad_id"] = soup.find("div", class_="grid-card").get("id").split("-")[-1]
         data["title"] = soup.select('[class^="description"]')[0].text
@@ -122,11 +125,14 @@ def get_soup(driver, url, pause=True):
 
 def get_all_page_ads(page_soup, site):
     if site == "autotrader":
-        script_tag = page_soup.find_all("script", text=re.compile(r"\breactRender\b"))[
-            -3
-        ]
-        data = json.loads(script_tag.getText()[114:-31])
-        return data["results"]["results"] + data["results"]["featuredTiles"]
+        # import ipdb; ipdb.set_trace()
+        # # script_tag = page_soup.find_all("script", text=re.compile(r"\breactRender\b"))[
+        # #     -3
+        # # ]
+        # # import ipdb; ipdb.set_trace()
+        # # data = json.loads(script_tag.getText()[114:-31])
+        # # return data["results"]["results"] + data["results"]["featuredTiles"]
+        return page_soup.select('[class^="b-result-tile__"]')
     elif site == "wbc":
         return page_soup.select('[class^="m-2 grid-card-container"]')
 

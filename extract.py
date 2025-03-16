@@ -29,6 +29,7 @@ for manufacturer in data.keys():
         scraped_data = []
         model_url = url_patterns[target_site].format(manufacturer, model, 1)
         print(f"Scraping {model_url}")
+        import ipdb;
         soup = get_soup(driver, model_url)
         if not any_ads(soup, target_site):
             print(f"No ads for {model} at {model_url}")
